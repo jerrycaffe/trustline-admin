@@ -10,6 +10,7 @@ import jenny from '../assets/jenny.png'
 import jane from '../assets/jane.png'
 
 import { HiDotsHorizontal } from "react-icons/hi";
+import { IoMdAdd } from "react-icons/io";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 
 const Users = () => {
@@ -111,7 +112,7 @@ const secondTableContent = [
           <p>Users Management</p>
           <div className='header-right'>
             <div className='buttons'>
-              <button>Send Message +</button>
+              <button>Send Message <IoMdAdd /></button>
               <button><IoIosRefresh/>Refresh</button>
             </div>
           </div>

@@ -1,5 +1,4 @@
 .settings{
-    border: 2px solid red;
     display: flex;
     position: fixed;
     top: 80px;
@@ -10,4 +9,106 @@
     font-size: 20px;
     padding: 10px 20px;
     overflow-y: scroll;
+}
+
+.settings p{
+    font-size: 24px;
+    font-weight: 600;
+    color: #001616;
+}
+
+.settings .navigation{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.settings .navigation button{
+    height: 50px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.navigation button.active {
+    color: #837AEF;
+    border-bottom: 1px solid #837AEF;
+    font-weight: bold;
+}
+
+.settings .navigation button:hover{
+    color: #837AEF;
+    border-bottom: 1px solid #837AEF;
+}
+
+.settings .general,
+.settings .reporting,
+.settings .notification,
+.settings .data-management,
+.settings .security,
+.settings .integration,
+.settings .system,
+.settings .customization{
+    margin: 30px 0 100px 0;
+    box-shadow: 0 2px 4px 0 #41414126;
+    padding: 20px ;
+    border-radius: 8px;
+}
+
+
+.app-branding .app-name p,
+.app-branding .app-logo p,
+.app-branding .app-icon p,
+.settings .languages .options p{
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.app-branding .app-name,
+.app-branding .app-logo,
+.app-branding .app-icon{
+    margin-top: 30px;
+}
+
+.app-branding .app-name button{
+    width: 121px;
+    height: 35px;
+    font-size: 20px;
+    font-weight: 500;
+    color: #001616;
+    margin-top: 10px;
+    background-color: #837AEF1A;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.app-branding .app-logo .logos,
+.app-branding .app-icon .icons{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.app-branding .app-logo button,
+.app-branding .app-icon button{ 
+    border: none;
+    background-color: #ffffff;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.settings .languages{
+    border-top: 1px solid #E0E0E0;
+    margin: 20px 0;
+    padding: 20px 0 0 0;
+}
+
+.settings .languages .options{
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

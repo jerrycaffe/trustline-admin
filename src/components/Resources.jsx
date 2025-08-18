@@ -11,8 +11,7 @@ import { CiStar, CiEdit } from "react-icons/ci";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { FaRegFolderOpen } from "react-icons/fa";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { IoMdClose } from "react-icons/io";
-
+import { IoMdClose, IoMdAdd } from "react-icons/io";
 
 const Resources = () => {
   const [isAddFileOpen, setIsAddFileOpen] = useState(false);
@@ -116,7 +115,7 @@ function handleAddOrEditFile(e) {
           <div className='left-side'>
             <div className='left-header'>
               <p>Resources</p>
-              <button type='button' onClick={handleOpenAddfile}>Add New + </button>
+              <button type='button' onClick={handleOpenAddfile}>Add New  <IoMdAdd/></button>
             </div>
             <div className='files'>
               {resources.map((res) => (

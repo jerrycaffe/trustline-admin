@@ -22,8 +22,8 @@
 .analytics .first-section .cards{
     display: flex;
     gap: 20px;
+    margin-top: 20px;
 }
-
 
 /* SECOND */
 .analytics .second-section{
