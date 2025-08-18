@@ -26,7 +26,7 @@
 }
 
 .resources .left-side .left-header p{
-    font-size: 20px;
+    font-size: 24px;
     font-weight: 600;
     color: #001616;
 }
@@ -42,6 +42,9 @@
     width: 115px;
     height: 40px;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .resources .left-side .left-header button:active{

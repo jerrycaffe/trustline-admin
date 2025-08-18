@@ -46,6 +46,9 @@
 .users .header .buttons button:first-of-type{
     color: #FFFFFF;
     background-color: #837AEF;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
 }
 
