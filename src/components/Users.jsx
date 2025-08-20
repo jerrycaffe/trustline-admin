@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import '../css/Users.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -10,12 +10,12 @@ import jenny from '../assets/jenny.png'
 import jane from '../assets/jane.png'
 
 import { HiDotsHorizontal } from "react-icons/hi";
-import { IoMdAdd } from "react-icons/io";
+import { IoMdAdd, IoMdClose } from "react-icons/io";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 
 const Users = () => {
 
-  const tableHead = ["Name","Type","Date Registered","Last Login","Ongoing Cases","Closed Cases"]
+  const tableHead = ["Name","Type","Date Registered","Last Login","Ongoing Cases","Closed Cases", ""]
 
 const topTableContent = [
   {
@@ -184,7 +184,17 @@ const secondTableContent = [
 }
 
 function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
+    const[isDetailsOpen, setIsDetailsOpen]= useState(false)
+    
+    function handleOpenDetails(){
+      setIsDetailsOpen(prev => !prev)
+  }
+  
+  function handleCloseDetails(){
+    setIsDetailsOpen(false)
+  }
   return(
+    <>
   <tr>
     <td className='name'><img src={image} />{name}</td>
     <td>{type}</td>
@@ -192,9 +202,19 @@ function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
     <td>{lastLogin}</td>
     <td>{ongoingCases}</td>
     <td>{closedCases}</td>
-    <td ><button className='details'><HiDotsHorizontal size={25}/></button></td>
+    <td ><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
   </tr>
-  )
+
+  {isDetailsOpen &&
+      <div className='submenu-dropdown'>
+      <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
+      <div className='options'>
+        <button>Details</button>
+        <button>Share</button>
+        <button>Deactivate</button> 
+      </div>
+    </div>}
+  </>)
 }
 
 export default Users 

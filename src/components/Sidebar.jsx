@@ -12,7 +12,7 @@ import { FaHandHoldingHeart, FaExpand  } from "react-icons/fa";
 import { IoIosSettings, IoMdContract  } from "react-icons/io";
 
 const Sidebar = () => {
-  const [active, setActive] = useState('');
+  const [active, setActive] = useState('Dashboard');
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
@@ -117,7 +117,12 @@ const Sidebar = () => {
           </button>
         </Link>
         <Link to="/login" className='link'>
-          <button className='logout'><BiLogOut size={28}/> {!collapsed && 'Logout'}</button>
+          <button className='logout'
+            onClick={() => {
+            localStorage.removeItem('activeSidebar'); // reset active
+            localStorage.removeItem('collapsedSidebar'); // optional reset
+            }}>
+         <BiLogOut size={28}/> {!collapsed && 'Logout'}</button>
         </Link>
         <button onClick={toggleCollapse} className='collapse'>
           {collapsed && <FaExpand  size={28}/>}

@@ -57,7 +57,6 @@
     border-radius: 8px;
 }
 
-
 .app-branding .app-name p,
 .app-branding .app-logo p,
 .app-branding .app-icon p,
@@ -111,4 +110,110 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.reporting .add-reports{
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 5px 0 20px 0;
+    border-bottom: 1px solid #E0E0E0;
+}
+
+.reporting .add-reports .add-report{
+    width: 250px;
+    background-color: #837AEF1A;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 5px;
+    border-radius: 8px;
+}
+
+.reporting .add-report p:first-of-type{
+    font-size: 20px;
+    font-weight: 500;
+    color: #001616;
+}
+
+.reporting .add-report p:last-of-type{
+    font-size: 16px;
+    font-weight: 400;
+    color: #001616;
+}
+
+.reporting .add-reports button,
+.reporting .custom-form .custom-content button{
+    width: 130px;
+    height: 48px;
+    border: 0.5px solid #001616;
+    font-size: 20px;
+    font-weight: 500;
+    color: #001616;
+    border-radius: 8px;
+    cursor: pointer;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reporting .add-reports button:hover,
+.reporting .custom-form .custom-content button:hover{
+    background-color: #837AEF;
+    color: #ffffff;
+    border: none;
+}
+
+.reporting .add-reports button:active,
+.reporting .custom-form .custom-content button:active{
+    background-color: hsl(245, 79%, 61%);
+    color: #ffffff;
+}
+
+.reporting .custom-form{
+    margin-top: 50px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.reporting .custom-form .custom-content{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.reporting .custom-form .custom-content p{
+    font-size: 16px;
+    font-weight: 500;
+    color: #001616;
+}
+
+.reporting .custom-form .custom-content .added{
+    display: flex;
+    width: 70%;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.reporting .custom-form .custom-content .added button{
+    width: auto;
+    height: 48px;
+    background-color: #837AEF1A;
+    color: #001616;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px;
+    border: none;
+    font-size: 16px;
+    justify-content: center;
+    border-radius: 8px;
+}
+
+.reporting .custom-form .custom-content .added button:hover{
+     color: #001616;
 }

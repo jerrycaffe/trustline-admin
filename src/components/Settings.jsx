@@ -9,9 +9,46 @@ import icon1 from '../assets/icon1.png'
 import icon2 from '../assets/icon2.png'
 import icon3 from '../assets/icon3.png'
 
-const Settings = () => {
-  const [activeTab, setActiveTab] = useState("General"); // default tab
+import { IoMdAdd, IoMdClose  } from "react-icons/io";
 
+const Settings = () => {
+  const [activeTab, setActiveTab] = useState("General");
+
+const addReport = [
+  {
+    title:"Gender-based Violence",
+    description:"For violence crimes against females"
+  },
+  {
+    title:"Rape Issue",
+    description:"For reporting rape crimes"
+  },
+  {
+    title:"Sexual Harrassment",
+    description:"For harrassment crimes"
+  },
+]  
+
+const customReport = [
+ {
+    title:"REPORTING FORM",
+    content1:"Incident type",
+    content2:"Date of Occurence",
+    content3:"Location",
+    content4:"Description",
+ },
+ { 
+    title:"SIGN UP FORM",
+    content1:"Email",
+    content2:"Phone Number",
+    content3:"Password",
+ },
+ {
+  title:"LOG IN FORM",
+  content1:"Email/Phone Number",
+  content2:"Password",
+ }
+]
   return (
     <div className='settings-container'>
       <Searchbar />
@@ -109,7 +146,31 @@ const Settings = () => {
 
         {activeTab === "Reporting" && (
           <div className='reporting'>
-            <p>Reporting Content</p>
+              <p>Report Categories</p>
+              <div className='add-reports'>
+              {addReport.map((value, index) => (
+                <Addreport
+                  key={index}
+                  title={value.title}
+                  description={value.description}
+                />
+              ))}
+              <button>Add new <IoMdAdd/></button>
+              </div>
+
+              <div className='custom-form'>
+                <p>Custom Form Fields</p>
+                 {customReport.map((value, index) =>
+                <Customform 
+                key={index}
+                title={value.title}
+                content1={value.content1}
+                content2={value.content2}
+                content3={value.content3}
+                content4={value.content4}
+                />
+                )}
+              </div>
           </div>
         )}
 
@@ -151,6 +212,41 @@ const Settings = () => {
       </div>
     </div>
   )
+}
+
+
+function Addreport({title, description}){
+  return(
+    <div className='add-report'>
+      <p>{title}</p>
+      <p>{description}</p>
+    </div>
+  )
+}
+
+function Customform({ title, content1, content2, content3, content4 }) {
+  
+  const [items, setItems] = useState([content1, content2, content3, content4]);
+
+  const handleRemove = (index) => {
+    setItems(items.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="custom-content">
+      <p>{title}</p>
+      <div className="added">
+        {items.map((item, index) => (
+          <button key={index}>
+            {item} <IoMdClose onClick={() => handleRemove(index)} />
+          </button>
+        ))}
+      </div>
+      <button>
+        Add new <IoMdAdd />
+      </button>
+    </div>
+  );
 }
 
 export default Settings

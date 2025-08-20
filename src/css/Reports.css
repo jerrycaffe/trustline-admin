@@ -75,7 +75,7 @@
 }
 
 .reports .reports-body table thead th {
-  text-align: left;
+  text-align: center;
   padding: 12px 16px;
   font-weight: 600;
   font-size: 14px;
@@ -92,6 +92,7 @@
   font-size: 16px;
   font-weight: 500;
   color: #001616;
+  text-align: center;
 }
 
 .reports .reports-body .status{
@@ -271,33 +272,36 @@
     background-color: #828282;
 }
 
-.submenu{
+.submenu-dropdown {
+  width: 180px;
+  position: absolute;
+  left: 85%;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+  padding: 10px;
+}
+
+.submenu-dropdown .options{
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    position: absolute;
-    top: 2%;
-    left: 32%;
-    border-radius: 8px;
-    box-shadow: 0 8px 8px 0 #0000000D;
-    background-color: #fff;
-    width: 250px;
-    height: auto;
-    padding: 10px;
+    align-items: center;
 }
 
-.submenu button{
-    width: 100%;
-    height: 40px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    background-color: transparent;
-    font-size: 16px;
-    font-weight: 400;
-    color: #001616;
+.submenu-dropdown button {
+  background: none;
+  border: none;
+  padding: 5px 15px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 14px;
+  width: 100%;
 }
 
-.submenu button:hover{
-    background-color: #837AEF;
+.submenu-dropdown button:hover {
+  background: #f5f5f5;
 }

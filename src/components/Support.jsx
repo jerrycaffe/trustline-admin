@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import '../css/Support.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -14,7 +14,7 @@ import jane from '../assets/jane.png'
 
 import { HiDotsHorizontal } from "react-icons/hi";
 import { FaLongArrowAltDown, FaLongArrowAltUp  } from "react-icons/fa";
-import { IoMdAdd } from "react-icons/io";
+import { IoMdAdd, IoMdClose } from "react-icons/io";
 
 const supportCard = [
   {
@@ -183,6 +183,15 @@ const Card = ({img, title, num, bg}) => {
 }
 
 const Tablecontent = ({id, image, name, priority}) => {
+  const[isDetailsOpen, setIsDetailsOpen]= useState(false)
+  
+  function handleOpenDetails(){
+    setIsDetailsOpen(prev => !prev)
+}
+
+function handleCloseDetails(){
+  setIsDetailsOpen(false)
+}
     let background;
     let color;
 
@@ -197,6 +206,7 @@ const Tablecontent = ({id, image, name, priority}) => {
     color = "#FF0909";
   } 
   return(
+    <>
     <tr>
       <td><input type='checkbox' /></td>
       <td>#{id}</td>
@@ -204,9 +214,19 @@ const Tablecontent = ({id, image, name, priority}) => {
       <td>Loading Error</td>
       <td><div className='priority' style={{background, color}}>{priority}</div></td>
       <td>15th July, 2025</td>
-      <td><button className='details'><HiDotsHorizontal size={25}/></button></td>
+      <td><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
     </tr>
-  )
+
+    {isDetailsOpen &&
+    <div className='submenu-dropdown'>
+    <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
+    <div className='options'>
+      <button>Open</button>
+      <button>Share</button>
+      <button>Delete</button> 
+    </div>
+  </div>}
+  </>)
 }
 
 export default Support 

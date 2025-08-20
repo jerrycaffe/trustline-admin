@@ -7,7 +7,7 @@ import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 import { IoIosRefresh } from "react-icons/io";
 
 const Incidents = () => {
-  const newReportHead =["CaseNo", "Type", "Date"]
+  const newReportHead =["CaseNo", "Type", "Date", ""]
   const newReportContent =[
   {
     id:"A1208",

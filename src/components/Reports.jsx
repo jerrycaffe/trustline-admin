@@ -31,7 +31,7 @@ function handleSortClose(){
 }
 
 
-  const tableHead = ["CaseNo","Type", "Status", "Tracking", "Date"];
+  const tableHead = ["CaseNo","Type", "Status", "Tracking", "Date", ""];
   const tableContent=[
     {
       id:"A1208",
@@ -204,16 +204,14 @@ function handleCloseDetails(){
 
 
     {isDetailsOpen &&
-    <div className='modal-overlay'>
-    <div className='submenu'>
-    <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={30}/></div>
+    <div className='submenu-dropdown'>
+    <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
     <div className='options'>
       <button>Details</button>
       <button>Download pdf</button>
       <button>Share</button>
       <button>Archive</button> 
     </div>
-  </div>
   </div>}
 </>  );
 }

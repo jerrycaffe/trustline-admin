@@ -51,7 +51,7 @@ const Dashboard = () => {
     },
   ];
 
-  const secondTableHead = ["CaseNo","Type", "Status", "Tracking", "Date"];
+  const secondTableHead = ["CaseNo","Type", "Status", "Tracking", "Date",""];
   const secondTableContent=[
     {
       id:"A1208",
