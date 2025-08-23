@@ -1,5 +1,4 @@
 .zen{
-    border: 2px solid red;
     display: flex;
     position: fixed;
     top: 80px;
@@ -11,3 +10,151 @@
     padding: 10px 20px;
     overflow-y: scroll;
 }
+.zen .header{
+    font-size: 24px;
+    font-weight: 600;
+    color: #001616;
+}
+
+.zen .top-section{
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.top-section .mood-tracker,
+.top-section .most-played{
+    width: 305px;
+    height: 350px;
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-shadow: 0 2px 4px 0 #41414126;
+    border-radius: 9px;
+    padding: 10px;
+}
+
+.head{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 ;
+    border-bottom: 0.5px solid #E0E0E0;
+}
+
+.head p{
+    font-size: 20px;
+    font-weight: 600;
+    color: #001616;
+    display: flex;
+    flex-direction: column;
+}
+
+.head p span{
+    font-size: 16px;
+    font-weight: 400;
+    color: #001616;
+}
+
+.top-section .mood-tracker .head select{
+    border: 2px solid black;
+    width: 103px;
+    height: 32px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #001616;
+    border: 4px;
+}
+
+.top-section .mood-tracker .bar-chart,
+.top-section .most-played .pie-chart{
+    width: 100%;
+    height: 80% ;
+    margin: 0 auto;
+}
+
+.most-played .header{
+    font-size: 20px;
+    font-weight: 600;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0 ;
+}
+
+.most-played .header span{
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.zen .bottom-section{
+    width: 100%;
+    box-shadow: 0 2px 4px 0 #41414126;
+}
+
+.bottom-section .head button{
+    width: 117px;
+    height: 40px;
+    background-color: #837AEF;
+    border: 0.5px solid #D9D9D9;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #FBFBFB;
+    cursor: pointer;
+}
+
+.bottom-section .head button:active{
+    background-color: hsl(245, 79%, 61%);
+}
+
+.bottom-section .zen-exercises{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.bottom-section .zen-exercises .zen-exercise{
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    gap: 20px;
+    border-bottom: 0.5px solid #E0E0E0;
+    padding: 10px 0;
+    position: relative;
+}
+
+.bottom-section .zen-exercises .zen-exercise .content p{
+    font-size: 16px;
+    font-weight: 500;
+    color: #001616;
+    margin-top: 10px;
+}
+
+.bottom-section .zen-exercises .zen-exercise .content .bottom{
+    width: 80%;
+    display: flex;
+    justify-content: space-between;
+    padding: 5px;
+}
+
+.bottom-section .zen-exercises .zen-exercise button{
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+}
+
+.bottom-section .zen-exercises .zen-exercise button:hover{
+    background-color: #837AEF;
+    color: #FBFBFB;
+}
+
+.bottom-section .zen-exercises .zen-exercise button:active{
+    background-color: hsl(245, 79%, 61%);
+    color: #FBFBFB;
+}
+

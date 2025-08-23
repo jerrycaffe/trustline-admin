@@ -3,6 +3,8 @@ import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import '../css/Reports.css'
 
+import warning from '../assets/warningOrangeBg.png'
+
 import { HiDotsHorizontal } from "react-icons/hi";
 import { RxDashboard } from "react-icons/rx";
 import { FaLongArrowAltDown, FaLongArrowAltUp  } from "react-icons/fa";
@@ -166,14 +168,38 @@ function handleSortClose(){
 
 function ReportList({ id, type, status, color, bgcolor, width }) {
   const[isDetailsOpen, setIsDetailsOpen]= useState(false)
+  const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
+    const [isArchivePopupOpen, setIsArchivePopupOpen] = useState(false)
+  
   
   function handleOpenDetails(){
     setIsDetailsOpen(prev => !prev)
 }
 
-function handleCloseDetails(){
-  setIsDetailsOpen(false)
+// function handleCloseDetails(){
+//   setIsDetailsOpen(false)
+// }
+
+function handleOpenDownloadModal(){
+  setIsDownloadPopupOpen(prev => !prev)
 }
+
+function handleCloseDownloadModal(){
+  setIsDownloadPopupOpen(false)
+}
+
+function handleStartDownload(){
+
+}
+
+function handleOpenArchiveModal(){
+  setIsArchivePopupOpen(prev => !prev)
+}
+
+function handleCloseArchiveModal(){
+  setIsArchivePopupOpen(false)
+}
+
   const today = new Date();
   const formattedDate = today.toDateString();
 
@@ -205,14 +231,41 @@ function handleCloseDetails(){
 
     {isDetailsOpen &&
     <div className='submenu-dropdown'>
-    <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
-    <div className='options'>
+      <div className='options'>
       <button>Details</button>
-      <button>Download pdf</button>
+      <button onClick={handleOpenDownloadModal}>Download pdf</button>
       <button>Share</button>
-      <button>Archive</button> 
+      <button onClick={handleOpenArchiveModal}>Archive</button> 
     </div>
   </div>}
+
+{isDownloadPopupOpen &&
+    <div className='modal-overlay'>
+        <div className='delete-popup'>
+        <div className='close-icon'><IoMdClose size={30} onClick={handleCloseDownloadModal}/></div>
+        <img src={warning} />
+        <p>Download Report</p>
+        <p>This report would be downloaded in pdf format, hence you will have access to it offline. Please note that this report should only be used for official purposes.</p>
+        <div className='buttons'>
+        <button type='submit' onClick={handleCloseDownloadModal}>Cancel</button>
+        <button type='submit' onClick={handleStartDownload}>Start Download</button>
+        </div>
+        </div>
+    </div>}
+    
+{isArchivePopupOpen &&
+    <div className='modal-overlay'>
+        <div className='delete-popup'>
+        <div className='close-icon'><IoMdClose size={30} onClick={handleCloseArchiveModal}/></div>
+        <img src={warning} />
+        <p>Archive Report</p>
+        <p>You are about to archive this report. You can find all archived reports in your profile. </p>
+        <div className='buttons'>
+        <button type='submit' onClick={handleCloseArchiveModal}>Cancel</button>
+        <button type='submit' onClick={handleStartDownload}>Archive</button>
+        </div>
+        </div>
+    </div>}
 </>  );
 }
 
