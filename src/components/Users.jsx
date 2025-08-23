@@ -190,9 +190,9 @@ function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
       setIsDetailsOpen(prev => !prev)
   }
   
-  function handleCloseDetails(){
-    setIsDetailsOpen(false)
-  }
+  // function handleCloseDetails(){
+  //   setIsDetailsOpen(false)
+  // }
   return(
     <>
   <tr>
@@ -205,15 +205,14 @@ function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
     <td ><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
   </tr>
 
-  {isDetailsOpen &&
-      <div className='submenu-dropdown'>
-      <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
-      <div className='options'>
-        <button>Details</button>
-        <button>Share</button>
-        <button>Deactivate</button> 
-      </div>
-    </div>}
+    {isDetailsOpen &&
+        <div className='submenu-dropdown'>
+        <div className='options'>
+          <button>Details</button>
+          <button>Share</button>
+          <button>Deactivate</button> 
+        </div>
+      </div>}
   </>)
 }
 

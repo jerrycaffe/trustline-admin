@@ -120,7 +120,7 @@ const Dashboard = [
         <div className='left'>
           <div className='left-header'>
           <p>Reports Analysis</p>
-          <select select onChange={handleChange} value={timeRange}>
+          <select onChange={handleChange} value={timeRange}>
             <option value="daily">Daily</option>
             <option value="weekly">Weekly</option>
             <option value="monthly">Monthly</option>
@@ -245,6 +245,11 @@ function Dashboardcard({text, number, percent, image, color, bgcolor}){
 }
 
 function Barchart({description}){
+const [timeRange, setTimeRange] = useState("monthly");
+
+function handleChange(e) {
+  setTimeRange(e.target.value);
+}
   return(
 <div className='bar-chart'>
   <div className='right-header'>
@@ -252,12 +257,13 @@ function Barchart({description}){
       <p>{description}</p>
       <p>4th-10th Aug</p>
     </div>
-    <select>
-      <option>Daily</option>
-      <option selected>Weekly</option>
-      <option>Monthly</option>
+    <select onChange={handleChange} value={timeRange}>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
     </select>
   </div>
+  {timeRange === "monthly" &&
   <div className='chart'>
 <Bar
   data={{
@@ -274,7 +280,7 @@ function Barchart({description}){
     options={{
       maintainAspectRatio: false}}
 />
-  </div>
+  </div>}
 </div>
   )
 }

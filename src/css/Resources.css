@@ -302,10 +302,7 @@
     font-size: 14px;
     font-weight: 500;
     color: #001616;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+    text-align: center;
 }
 
 .delete-popup .buttons{

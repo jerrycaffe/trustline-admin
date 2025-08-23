@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useState} from "react";
 import { Link } from "react-router-dom";
 import { Chart as ChartJS } from "chart.js/auto";
 import { Bar, Doughnut, Line } from "react-chartjs-2";
@@ -342,6 +342,16 @@ function ZenExercise({ text, width, color }) {
 }
 
 function ReportList({ id, type, status, color, bgcolor, width }) {
+    const[isDetailsOpen, setIsDetailsOpen]= useState(false)
+    
+    function handleOpenDetails(){
+      setIsDetailsOpen(prev => !prev)
+  }
+  
+  // function handleCloseDetails(){
+  //   setIsDetailsOpen(false)
+  // }
+
   const today = new Date();
   const formattedDate = today.toDateString();
 
@@ -349,6 +359,7 @@ function ReportList({ id, type, status, color, bgcolor, width }) {
     status === "Resolved" || status === "Closed" ? "100%" : width;
 
   return (
+    <>
     <tr>
       <td>{id}</td>
       <td>{type}</td>
@@ -362,12 +373,22 @@ function ReportList({ id, type, status, color, bgcolor, width }) {
       </td>
       <td>{formattedDate}</td>
       <td>
-        <button className="icon">
+        <button className="icon" onClick={handleOpenDetails}>
           <HiDotsHorizontal />
         </button>
       </td>
     </tr>
-  );
+
+      {isDetailsOpen &&
+      <div className='submenu-dropdown'>
+      <div className='options'>
+      <button>Details</button>
+      <button>Download pdf</button>
+      <button>Share</button>
+      <button>Archive</button>  
+      </div>
+    </div>}
+  </>);
 }
 
 export default Dashboard;

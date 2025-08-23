@@ -189,9 +189,9 @@ const Tablecontent = ({id, image, name, priority}) => {
     setIsDetailsOpen(prev => !prev)
 }
 
-function handleCloseDetails(){
-  setIsDetailsOpen(false)
-}
+// function handleCloseDetails(){
+//   setIsDetailsOpen(false)
+// }
     let background;
     let color;
 
@@ -219,7 +219,6 @@ function handleCloseDetails(){
 
     {isDetailsOpen &&
     <div className='submenu-dropdown'>
-    <div onClick={handleCloseDetails} className='close-icon'><IoMdClose size={25}/></div>
     <div className='options'>
       <button>Open</button>
       <button>Share</button>
