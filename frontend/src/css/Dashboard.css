@@ -195,6 +195,7 @@
   font-size: 14px;
   color: #001616;
   font-weight: 400;
+  text-align: left;
 }
 
 .users-section .users-body table .user-name{
@@ -396,6 +397,7 @@
   font-size: 16px;
   font-weight: 500;
   color: #001616;
+  text-align: left;
 }
 
 .reports-section .reports-body .status{

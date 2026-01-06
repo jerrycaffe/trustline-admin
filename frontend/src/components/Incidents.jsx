@@ -33,21 +33,25 @@ const Incidents = () => {
       id:"A1208",
       type:"Sexual Harrassment",
       text:"Questioning of victims",
+      status: "In Progress",
     },
     { 
       id:"A2051",
       type:"Gender-based Violence",
-      text:"Referring of victims for selfcare/checkup"
+      text:"Referring of victims for selfcare/checkup",
+      status: "In Progress",
     },
     {
       id:"A2351",
       type:"Rape Issues",
-      text:"Referring of victims for selfcare/checkup"
+      text:"Referring of victims for selfcare/checkup",
+      status: "In Progress",
     },
     { 
       id:"A2351",
       type:"Rape Issues",
-      text:"Referring of victims for selfcare/checkup"
+      text:"Referring of victims for selfcare/checkup",
+      status: "In Progress"
     }
   ]
 
@@ -106,6 +110,7 @@ const Incidents = () => {
               id={value.id}
               type={value.type}
               text={value.text}
+              status={value.status}
             />
             ))}
           </tbody>
@@ -120,15 +125,20 @@ const Incidents = () => {
 }
 
 function Newreport({id, type}){
-  const today = new Date();
-  const formattedDate = today.toDateString();
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  return `${day}-${month}-${year}`;
+}
 
   return(
     <>
     <tr>
     <td>{id}</td>
     <td>{type}</td>
-    <td>{formattedDate}</td>
+    <td>{formatDate(new Date())}</td>
     <td><button>View</button></td>
     </tr>
     </>
@@ -137,17 +147,39 @@ function Newreport({id, type}){
 
 }
 
-function OngoingCases({id, type, text}){
-  const today = new Date();
-  const formattedDate = today.toDateString();
+function OngoingCases({id, type, text, status}){
 
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  return `${day}-${month}-${year}`;
+}
+
+let background;
+let color;
+
+  if(status === "Resolved"){
+    background = "#48C9B01A";
+    color = "#48C9B0";
+  } else if (status === "Pending"){
+    background = "#EAC4001A";
+    color = "#EAC400";
+  } else if (status === "In Progress"){
+    background = "#3DACF51A";
+    color = "#3DACF5";
+  } else if (status === "Closed"){
+    background = "#9999991A";
+    color = "#999999";
+  }
   return(
     <>
     <tr>
     <td>{id}</td>
     <td>{type}</td>
-    <td>{formattedDate}</td>
-    <td><div className='status'>In Progress</div></td>
+    <td>{formatDate(new Date())}</td>
+    <td><div className='status' style={{background, color}}>{status}</div></td>
     <td><div className='text'>{text}</div></td>
     </tr>
     </>

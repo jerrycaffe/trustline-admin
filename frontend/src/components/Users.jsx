@@ -193,12 +193,20 @@ function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
   // function handleCloseDetails(){
   //   setIsDetailsOpen(false)
   // }
+  
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  return `${day}-${month}-${year}`;
+}
   return(
     <>
   <tr>
     <td className='name'><img src={image} />{name}</td>
     <td>{type}</td>
-    <td>15th July, 2025</td>
+    <td>{formatDate(new Date())}</td>
     <td>{lastLogin}</td>
     <td>{ongoingCases}</td>
     <td>{closedCases}</td>

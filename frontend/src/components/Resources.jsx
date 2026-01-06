@@ -232,7 +232,13 @@ function handleAddOrEditFile(e) {
 };
 
 function Resource({ title, onClick }) {
-  const date = new Date().toLocaleDateString();
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  return `${day}-${month}-${year}`;
+}
   const truncatedTitle = title.length > 25 ? title.slice(0, 25) + "..." : title;
 
   return (
@@ -240,7 +246,7 @@ function Resource({ title, onClick }) {
       <div className='file-left'><GrDocumentPdf size={30} /></div>
       <div className='file-right'>
         <p>{truncatedTitle}</p>
-        <p><span className='date'>{date}</span></p>
+        <p><span className='date'>{formatDate(new Date())}</span></p>
       </div>
     </div>
   );

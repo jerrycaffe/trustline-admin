@@ -132,7 +132,6 @@ const Dashboard = [
           <div className="heading">
             <p>Dashboard</p>
             <button>
-              {" "}
               <HiOutlineAdjustmentsVertical size={24} />
               Filter
             </button>
@@ -358,6 +357,13 @@ function ReportList({ id, type, status, color, bgcolor, width }) {
   const progressWidth =
     status === "Resolved" || status === "Closed" ? "100%" : width;
 
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2);
+  return `${day}-${month}-${year}`;
+}
   return (
     <>
     <tr>
@@ -371,7 +377,7 @@ function ReportList({ id, type, status, color, bgcolor, width }) {
           <div className="progress" style={{ width: progressWidth }}></div>
         </div>
       </td>
-      <td>{formattedDate}</td>
+      <td>{formatDate(new Date())}</td>
       <td>
         <button className="icon" onClick={handleOpenDetails}>
           <HiDotsHorizontal />

@@ -205,6 +205,14 @@ const Tablecontent = ({id, image, name, priority}) => {
     background = "#FF787880";
     color = "#FF0909";
   } 
+
+function formatDate(date) {
+  const d = new Date(date);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  return `${day}-${month}-${year}`;
+}
   return(
     <>
     <tr>
@@ -213,7 +221,7 @@ const Tablecontent = ({id, image, name, priority}) => {
       <td className='requester'><img src={image}/> {name}</td>
       <td>Loading Error</td>
       <td><div className='priority' style={{background, color}}>{priority}</div></td>
-      <td>15th July, 2025</td>
+      <td>{formatDate(new Date())}</td>
       <td><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
     </tr>
 
