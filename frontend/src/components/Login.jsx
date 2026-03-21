@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import text from '../assets/logotext.png';
 import LoginRightSide from './LoginRightSide';
 import '../css/Login.css';
-import { Link } from 'react-router-dom';
+import { api, AUTH_ENDPOINTS } from '../services/api';
 
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     let valid = true;
 
     setEmailError('');
     setPasswordError('');
+    setApiError('');
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(email)) {
@@ -30,8 +35,19 @@ const Login = () => {
     }
 
     if (valid) {
-
-      console.log('Login successful:', { email, password });
+      setIsLoading(true);
+      try {
+        const response = await api.post(AUTH_ENDPOINTS.LOGIN, { email, password });
+        // Store token if returned
+        if (response.token) {
+          localStorage.setItem('authToken', response.token);
+        }
+        navigate('/dashboard');
+      } catch (error) {
+        setApiError(error.message || 'Login failed. Please try again.');
+      } finally {
+        setIsLoading(false);
+      }
     }
   };
 
@@ -61,7 +77,10 @@ const Login = () => {
             />
             {passwordError && <p className='error'>{passwordError}</p>}
 
-           <Link to="/dashboard" className='link'><button type='submit'>Login</button></Link>
+            {apiError && <p className='error'>{apiError}</p>}
+            <button type='submit' disabled={isLoading}>
+              {isLoading ? 'Logging in...' : 'Login'}
+            </button>
             <span><Link to='/forgot-password' className='link'>Forgot Password</Link></span>
             <p>
               By clicking continue, you agree to our <strong>Terms of Service</strong> and{' '}
