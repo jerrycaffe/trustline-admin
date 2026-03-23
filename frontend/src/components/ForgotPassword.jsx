@@ -68,7 +68,7 @@ const handleVerify = () => {
 
     // Redirect after 2.5 seconds
     setTimeout(() => {
-      window.location.href = '/reset-password'; // Replace with your actual route
+      window.location.href = '/reset-password';
     }, 1500);
   } else {
     alert('Incorrect OTP');
@@ -135,10 +135,12 @@ const handleVerify = () => {
       )}
 
 {isVerified && (
+  <div className='overlay'>
     <div className='success-popup'>
     <img src={success} alt='image'/>
     <h1>Congratulations!</h1>
     <p>Your account has been verified successfully</p>
+  </div>
   </div>
 )}
     </>

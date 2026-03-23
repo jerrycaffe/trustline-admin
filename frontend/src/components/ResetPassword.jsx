@@ -24,10 +24,8 @@ const ResetPassword = () => {
       return;
     }
 
-    // Show success popup
     setShowSuccess(true);
 
-    // Redirect to login after 5 seconds
     setTimeout(() => {
       window.location.href = '/login';
     }, 1500);
@@ -77,12 +75,16 @@ const ResetPassword = () => {
         <ForgotPasswordSide />
       </div>
 
-      {showSuccess && (
-        <div className='success-popup'>
-          <img src={success} alt='Success Icon' />
-          <h1>Successful!</h1>
-          <p>Your password has been reset successfully</p>
-        </div>
+        {showSuccess && (
+          <>
+              <div className='overlay'>
+              <div className='success-popup'>
+                  <img src={success} alt='Success Icon' />
+                  <h1>Successful!</h1>
+                  <p>Your password has been reset successfully</p>
+              </div>
+              </div>
+          </>
       )}
     </>
   );

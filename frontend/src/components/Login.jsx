@@ -37,8 +37,8 @@ const Login = () => {
     if (valid) {
       setIsLoading(true);
       try {
-        const response = await api.post(AUTH_ENDPOINTS.LOGIN, { email, password });
-        // Store token if returned
+        const response = await api.post(AUTH_ENDPOINTS.LOGIN, { email, password })
+
         if (response.token) {
           localStorage.setItem('authToken', response.token);
         }
@@ -83,7 +83,7 @@ const Login = () => {
             </button>
             <span><Link to='/forgot-password' className='link'>Forgot Password</Link></span>
             <p>
-              By clicking continue, you agree to our <strong>Terms of Service</strong> and{' '}
+              By clicking continue, you agree to our <strong>Terms of Service</strong> and
               <strong>Privacy Policy</strong>
             </p>
           </form>
