@@ -7,8 +7,8 @@ const LoginRightSide = () => {
     <div className='login-rightside'>
         <div className='container'>
         <img src={violence} alt="image" />
-        <h2>Report a Case</h2>
-        <p>To report a case, you’d need to provide vital and legitimate information. You are also able to upload any media as evidence to support your report. After the report has been received, you would be contacted to proceed with the next steps.</p>
+        <h2>Manage Reported Cases</h2>
+        <p>TrustLine is a secure case management platform designed to help organizations track, investigate, and resolve reported incidents with transparency and accountability.</p>
         </div>
     </div>
   )

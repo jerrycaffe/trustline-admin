@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import '../css/Users.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -10,10 +11,11 @@ import jenny from '../assets/jenny.png'
 import jane from '../assets/jane.png'
 
 import { HiDotsHorizontal } from "react-icons/hi";
-import { IoMdAdd, IoMdClose } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 
 const Users = () => {
+  const navigate = useNavigate()
 
   const tableHead = ["Name","Type","Date Registered","Last Login","Ongoing Cases","Closed Cases", ""]
 
@@ -22,6 +24,9 @@ const topTableContent = [
    image:jenny,
    name:"Jenny Wilson",
    type:"Victim",
+   email: "jennywilson@gmail.com",
+   phoneNumber: "+234 811 345 2201",
+   dateRegistered: "12th June, 2024",
    lastLogin:"Today",
    ongoingCases:"0",
    closedCases:"0"
@@ -30,6 +35,9 @@ const topTableContent = [
    image:wade,
    name:"Wade Warren",
    type:"Victim",
+   email: "wadewarren@gmail.com",
+   phoneNumber: "+234 803 445 2245",
+   dateRegistered: "5th July, 2024",
    lastLogin:"Today",
    ongoingCases:"0",
    closedCases:"0"
@@ -41,22 +49,31 @@ const secondTableContent = [
    image:aina,
    name:"Modupe Aina",
    type:"Victim",
+   email: "modupe077@gmail.com",
+   phoneNumber: "+234 801 886 7528",
+   dateRegistered: "12th June, 2024",
    lastLogin:"Today",
-   ongoingCases:"2",
-   closedCases:"0"
+   ongoingCases:"3",
+   closedCases:"8"
   },
   {
    image:aina,
    name:"Modupe Aina",
    type:"Victim",
+   email: "modupe077@gmail.com",
+   phoneNumber: "+234 801 886 7528",
+   dateRegistered: "12th June, 2024",
    lastLogin:"Today",
-   ongoingCases:"2",
-   closedCases:"0"
+   ongoingCases:"3",
+   closedCases:"8"
   },
   {
    image:jane,
    name:"Jane Doe",
    type:"Witness",
+   email: "janedoe@gmail.com",
+   phoneNumber: "+234 808 100 9920",
+   dateRegistered: "20th May, 2024",
    lastLogin:"Yesterday",
    ongoingCases:"1",
    closedCases:"2"
@@ -65,6 +82,9 @@ const secondTableContent = [
    image:jane,
    name:"Jane Doe",
    type:"Witness",
+   email: "janedoe@gmail.com",
+   phoneNumber: "+234 808 100 9920",
+   dateRegistered: "20th May, 2024",
    lastLogin:"Yesterday",
    ongoingCases:"1",
    closedCases:"2"
@@ -73,6 +93,9 @@ const secondTableContent = [
    image:jenny,
    name:"Jenny Wilson",
    type:"Victim",
+   email: "jennywilson@gmail.com",
+   phoneNumber: "+234 811 345 2201",
+   dateRegistered: "12th June, 2024",
    lastLogin:"Today",
    ongoingCases:"0",
    closedCases:"0"
@@ -81,6 +104,9 @@ const secondTableContent = [
    image: jenny,
    name:"Jenny Wilson",
    type:"Victim",
+   email: "jennywilson@gmail.com",
+   phoneNumber: "+234 811 345 2201",
+   dateRegistered: "12th June, 2024",
    lastLogin:"Today",
    ongoingCases:"0",
    closedCases:"0"
@@ -89,6 +115,9 @@ const secondTableContent = [
    image:wade,
    name:"Wade Warren",
    type:"Witness",
+   email: "wadewarren@gmail.com",
+   phoneNumber: "+234 803 445 2245",
+   dateRegistered: "5th July, 2024",
    lastLogin:"Yesterday",
    ongoingCases:"4",
    closedCases:"0"
@@ -97,11 +126,18 @@ const secondTableContent = [
    image:wade,
    name:"Wade Warren",
    type:"Witness",
+   email: "wadewarren@gmail.com",
+   phoneNumber: "+234 803 445 2245",
+   dateRegistered: "5th July, 2024",
    lastLogin:"Yesterday",
    ongoingCases:"4",
    closedCases:"0"
   },
 ]
+
+function handleOpenUserDetails(user) {
+  navigate('/users/details', { state: { user } })
+}
 
   return (
     <div className='users-container'>
@@ -124,28 +160,33 @@ const secondTableContent = [
               </p>
               <button><HiOutlineAdjustmentsVertical size={20}/>Filter</button>
           </div>
-        <table>
-          <thead>
-            <tr>
-              {tableHead.map((value, index) => (
-                <th key={index}>{value}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {topTableContent.map((value, index) => (
-            <List 
-              key={index}
-              image={value.image}
-              name={value.name}
-              type={value.type}
-              lastLogin={value.lastLogin}
-              ongoingCases={value.ongoingCases}
-              closedCases={value.closedCases}
-            /> 
-            ))}
-          </tbody>
-        </table>
+          <div className='users-table-shell'>
+            <table>
+              <thead>
+                <tr>
+                  {tableHead.map((value, index) => (
+                    <th key={index}>{value}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {topTableContent.map((value, index) => (
+                <List 
+                  key={index}
+                  user={value}
+                  image={value.image}
+                  name={value.name}
+                  type={value.type}
+                  dateRegistered={value.dateRegistered}
+                  lastLogin={value.lastLogin}
+                  ongoingCases={value.ongoingCases}
+                  closedCases={value.closedCases}
+                  onOpenDetails={handleOpenUserDetails}
+                /> 
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <div className='every-user'>
@@ -155,35 +196,40 @@ const secondTableContent = [
               </p>
               <button><HiOutlineAdjustmentsVertical size={20}/>Filter</button>
           </div>
-        <table>
-          <thead>
-            <tr>
-              {tableHead.map((value, index) => (
-                <th key={index}>{value}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {secondTableContent.map((value, index) => (
-            <List 
-              key={index}
-              image={value.image}
-              name={value.name}
-              type={value.type}
-              lastLogin={value.lastLogin}
-              ongoingCases={value.ongoingCases}
-              closedCases={value.closedCases}
-            /> 
-            ))}
-          </tbody>
-        </table>
+          <div className='users-table-shell'>
+            <table>
+              <thead>
+                <tr>
+                  {tableHead.map((value, index) => (
+                    <th key={index}>{value}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {secondTableContent.map((value, index) => (
+                <List 
+                  key={index}
+                  user={value}
+                  image={value.image}
+                  name={value.name}
+                  type={value.type}
+                  dateRegistered={value.dateRegistered}
+                  lastLogin={value.lastLogin}
+                  ongoingCases={value.ongoingCases}
+                  closedCases={value.closedCases}
+                  onOpenDetails={handleOpenUserDetails}
+                /> 
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
   )
 }
 
-function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
+function  List({ user, image, name, type, dateRegistered, lastLogin, ongoingCases, closedCases, onOpenDetails }){
     const[isDetailsOpen, setIsDetailsOpen]= useState(false)
     
     function handleOpenDetails(){
@@ -194,33 +240,27 @@ function  List({image, name, type, lastLogin, ongoingCases, closedCases}){
   //   setIsDetailsOpen(false)
   // }
   
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
-  return `${day}-${month}-${year}`;
-}
   return(
     <>
-  <tr>
+  <tr onClick={() => onOpenDetails(user)}>
     <td className='name'><img src={image} />{name}</td>
     <td>{type}</td>
-    <td>{formatDate(new Date())}</td>
+    <td>{dateRegistered}</td>
     <td>{lastLogin}</td>
     <td>{ongoingCases}</td>
     <td>{closedCases}</td>
-    <td ><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
-  </tr>
-
-    {isDetailsOpen &&
+    <td className='action-cell'>
+      <button className='details' onClick={(event) => { event.stopPropagation(); handleOpenDetails(); }}><HiDotsHorizontal size={20}/></button>
+      {isDetailsOpen &&
         <div className='submenu-dropdown'>
-        <div className='options'>
-          <button>Details</button>
-          <button>Share</button>
-          <button>Deactivate</button> 
-        </div>
-      </div>}
+          <div className='options'>
+            <button onClick={(event) => { event.stopPropagation(); onOpenDetails(user); }}>Details</button>
+            <button>Share</button>
+            <button>Deactivate</button>
+          </div>
+        </div>}
+    </td>
+  </tr>
   </>)
 }
 

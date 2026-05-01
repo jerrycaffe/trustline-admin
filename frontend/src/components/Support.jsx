@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import '../css/Support.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -14,7 +14,7 @@ import jane from '../assets/jane.png'
 
 import { HiDotsHorizontal } from "react-icons/hi";
 import { FaLongArrowAltDown, FaLongArrowAltUp  } from "react-icons/fa";
-import { IoMdAdd, IoMdClose } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 
 const supportCard = [
   {
@@ -43,129 +43,162 @@ const supportCard = [
   },
 ]
 
-const tableHead = [ "","ID", "Requester", "Topic", "Priority", "Date Created", ""]
+const tableHead = ["", "ID", "Requester", "Topic", "Priority", "Date Created", ""]
 
-const tableContent = [
+const newTickets = [
   {
     id:"18754",
     image:aina,
     name:"Modupe Aina",
+    topic: "Account access issue",
+    createdAt: "2026-04-24",
     priority:"Low",
   },
   {
     id:"18755",
     image:aina,
     name:"Modupe Aina",
+    topic: "Evidence upload failed",
+    createdAt: "2026-04-23",
     priority:"Medium",
   },
   {
     id:"18756",
     image:aina,
     name:"Modupe Aina",
+    topic: "Case status delay",
+    createdAt: "2026-04-22",
     priority:"Low",
   },
   {
     id:"18757",
     image:aina,
     name:"Modupe Aina",
+    topic: "Unsafe content report",
+    createdAt: "2026-04-22",
     priority:"Low",
   },
   {
     id:"18759",
     image:aina,
     name:"Modupe Aina",
+    topic: "Emergency escalation",
+    createdAt: "2026-04-21",
     priority:"High",
   },
 ]
 
+const inProgressTickets = [
+  {
+    id:"18810",
+    image:jane,
+    name:"Jane Cooper",
+    topic: "Harassment report review",
+    createdAt: "2026-04-19",
+    priority:"High",
+  },
+  {
+    id:"18811",
+    image:wade,
+    name:"Wade Warren",
+    topic: "Sensitive media verification",
+    createdAt: "2026-04-18",
+    priority:"Medium",
+  },
+  {
+    id:"18812",
+    image:jenny,
+    name:"Jenny Wilson",
+    topic: "Duplicate submission",
+    createdAt: "2026-04-17",
+    priority:"Low",
+  },
+]
+
 const Support = () => {
+  const [openMenuRowId, setOpenMenuRowId] = useState(null)
+
+  const totalTickets = useMemo(() => (
+    newTickets.length + inProgressTickets.length
+  ), [])
+
+  const resolvedPct = useMemo(() => (
+    Math.round((78 / totalTickets) * 100)
+  ), [totalTickets])
+
+  function toggleRowMenu(rowId) {
+    setOpenMenuRowId((prev) => (prev === rowId ? null : rowId))
+  }
+
+  function closeRowMenu() {
+    setOpenMenuRowId(null)
+  }
+
   return (
-<div className='support-container'>
-<Searchbar />
-<Sidebar />
-<div className='support'>
-  <div className="support-header">
-    <p>Support</p>
-    <button>Create ticket <IoMdAdd/></button>
-  </div>
-  <div className='support-cards'>
-        {supportCard.map((value, index) => (
-        <Card
-        key={index}
-        img={value.img}
-        title={value.title}
-        num={value.num}
-        bg={value.bg}
-        />
-        ))}
-  </div>
-  <div className='tickets'>
-    <div className='ticket-head'>
-    <p>New Tickets({tableContent.length})<span>View new tickets here</span></p>
-    <button><FaLongArrowAltUp size={25}/><FaLongArrowAltDown size={25}/></button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          {tableHead.map((value, index) => (
-            <th key={index}>{value}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {tableContent.map((value, index) => (
-        <Tablecontent
-        key={index} 
-        id={value.id}
-        image={value.image}
-        name={value.name}
-        priority={value.priority}
-        bgColor={value.bgColor}
-        color={value.color}
-        />        
-        ))}
-      </tbody>
-    </table>
-  </div>
+    <div className='support-container'>
+      <Searchbar />
+      <Sidebar />
 
-  <div className='tickets'>
-    <div className='ticket-head'>
-    <p>Tickets in Progress</p>
-    <button><FaLongArrowAltUp size={25}/><FaLongArrowAltDown size={25}/></button>
-    </div>
-    <table>
-      <thead>
-        <tr>
-          {tableHead.map((value, index) => (
-            <th key={index}>{value}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {tableContent.map((value, index) => (
-        <Tablecontent
-        key={index} 
-        id={value.id}
-        image={value.image}
-        name={value.name}
-        priority={value.priority}
-        bgColor={value.bgColor}
-        color={value.color}
-        />        
-        ))}
-      </tbody>
-    </table>
-  </div>
+      <main className='support' onClick={closeRowMenu}>
+        <div className='support-inner'>
+          <div className='support-header'>
+            <div>
+              <p>Support</p>
+              <span>Track and resolve user tickets with your moderation team.</span>
+            </div>
+            <button type='button'>
+              Create ticket
+              <IoMdAdd />
+            </button>
+          </div>
 
-</div>
-</div>
+          <div className='support-cards'>
+            {supportCard.map((value, index) => (
+              <Card
+                key={index}
+                img={value.img}
+                title={value.title}
+                num={value.num}
+                bg={value.bg}
+              />
+            ))}
+          </div>
+
+          <div className='support-summary'>
+            <span>Resolution efficiency</span>
+            <div className='summary-track'>
+              <div className='summary-fill' style={{ width: `${resolvedPct}%` }} />
+            </div>
+            <strong>{resolvedPct}% resolved this week</strong>
+          </div>
+
+          <TicketTable
+            title={`New Tickets (${newTickets.length})`}
+            subtitle='Recently created and awaiting assignment'
+            rows={newTickets}
+            tableHead={tableHead}
+            openMenuRowId={openMenuRowId}
+            onToggleRowMenu={toggleRowMenu}
+          />
+
+          <TicketTable
+            title='Tickets in Progress'
+            subtitle='Being actively handled by support agents'
+            rows={inProgressTickets}
+            tableHead={tableHead}
+            openMenuRowId={openMenuRowId}
+            onToggleRowMenu={toggleRowMenu}
+          />
+        </div>
+      </main>
+    </div>
   )
 }
 
 const Card = ({img, title, num, bg}) => {
   return (
     <div className='supportcard'>
-      <div className="support-card" style={{background:bg}}>
+      <div className='support-card' style={{background:bg}}>
           <img src={img} />
           <p>{title.toUpperCase()}</p>
           <div className='card-bottom'>
@@ -182,18 +215,69 @@ const Card = ({img, title, num, bg}) => {
   );
 }
 
-const Tablecontent = ({id, image, name, priority}) => {
-  const[isDetailsOpen, setIsDetailsOpen]= useState(false)
-  
-  function handleOpenDetails(){
-    setIsDetailsOpen(prev => !prev)
+const TicketTable = ({
+  title,
+  subtitle,
+  rows,
+  tableHead,
+  openMenuRowId,
+  onToggleRowMenu,
+}) => {
+  return (
+    <section className='tickets'>
+      <div className='ticket-head'>
+        <p>
+          {title}
+          <span>{subtitle}</span>
+        </p>
+        <button type='button'>
+          <FaLongArrowAltUp size={18} />
+          <FaLongArrowAltDown size={18} />
+        </button>
+      </div>
+
+      <div className='support-table-shell'>
+        <table>
+          <thead>
+            <tr>
+              {tableHead.map((value, index) => (
+                <th key={index}>{value}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((value) => (
+              <Tablecontent
+                key={value.id}
+                id={value.id}
+                image={value.image}
+                name={value.name}
+                topic={value.topic}
+                createdAt={value.createdAt}
+                priority={value.priority}
+                isMenuOpen={openMenuRowId === value.id}
+                onToggleMenu={() => onToggleRowMenu(value.id)}
+              />
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  )
 }
 
-// function handleCloseDetails(){
-//   setIsDetailsOpen(false)
-// }
-    let background;
-    let color;
+const Tablecontent = ({
+  id,
+  image,
+  name,
+  topic,
+  createdAt,
+  priority,
+  isMenuOpen,
+  onToggleMenu,
+}) => {
+  let background;
+  let color;
 
   if (priority === "Low") {
     background = "#A3E4D780";
@@ -210,30 +294,42 @@ function formatDate(date) {
   const d = new Date(date);
   const day = String(d.getDate()).padStart(2, "0");
   const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
+  const year = String(d.getFullYear()).slice(-2);
   return `${day}-${month}-${year}`;
 }
-  return(
-    <>
-    <tr>
-      <td><input type='checkbox' /></td>
-      <td>#{id}</td>
-      <td className='requester'><img src={image}/> {name}</td>
-      <td>Loading Error</td>
-      <td><div className='priority' style={{background, color}}>{priority}</div></td>
-      <td>{formatDate(new Date())}</td>
-      <td><button className='details' onClick={handleOpenDetails}><HiDotsHorizontal size={25}/></button></td>
-    </tr>
 
-    {isDetailsOpen &&
-    <div className='submenu-dropdown'>
-    <div className='options'>
-      <button>Open</button>
-      <button>Share</button>
-      <button>Delete</button> 
-    </div>
-  </div>}
-  </>)
+  function handleMenuClick(event) {
+    event.stopPropagation()
+    onToggleMenu()
+  }
+
+  return (
+    <>
+      <tr>
+        <td><input type='checkbox' /></td>
+        <td>#{id}</td>
+        <td className='requester'><img src={image} alt={name} />{name}</td>
+        <td>{topic}</td>
+        <td><div className='priority' style={{ background, color }}>{priority}</div></td>
+        <td>{formatDate(createdAt)}</td>
+        <td className='actions-cell'>
+          <button type='button' className='details' onClick={handleMenuClick}>
+            <HiDotsHorizontal size={20} />
+          </button>
+
+          {isMenuOpen && (
+            <div className='submenu-dropdown'>
+              <div className='options'>
+                <button type='button'>Open</button>
+                <button type='button'>Share</button>
+                <button type='button'>Delete</button>
+              </div>
+            </div>
+          )}
+        </td>
+      </tr>
+    </>
+  )
 }
 
 export default Support 

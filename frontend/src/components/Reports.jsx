@@ -1,44 +1,26 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import '../css/Reports.css'
 
 import warning from '../assets/warningOrangeBg.png'
-import audio from '../assets/media1.png'
-import img1 from '../assets/media2.png'
-import video from '../assets/media3.png'
-import img2 from '../assets/media4.png'
-import img3 from '../assets/media5.png'
 
 import { HiDotsHorizontal, HiDotsVertical } from "react-icons/hi";
 import { RxDashboard } from "react-icons/rx";
 import { FaLongArrowAltDown, FaLongArrowAltUp  } from "react-icons/fa";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
-import { IoMdClose, IoMdAdd } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 import { GrDocumentPdf } from "react-icons/gr";
 import { RxHamburgerMenu } from "react-icons/rx";
-import { FaRegFolderOpen } from "react-icons/fa";
-import { MdOutlineFileDownload } from "react-icons/md";
-import { IoArrowBackOutline } from "react-icons/io5";
 
 
 const Reports = () => {
+const navigate = useNavigate()
 const[isFilterOpen, setIsFilterOpen]= useState(false)
 const[isSortOpen, setIsSortOpen]= useState(false)
 const[isPdfOpen, setIsPdfOpen] = useState(false)
-const[selectedReport, setSelectedReport] = useState(null);
-const[isReportDetailsOpen, SetisReportDetailsOpen] = useState(false)
-const[isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
-const[isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
-
-function handleOpenDownloadModal(){
-  setIsDownloadPopupOpen(prev => !prev)
-}
-
-function handleCloseDownloadModal(){
-  setIsDownloadPopupOpen(false)
-}
 function handleFilterOpen(){
   setIsFilterOpen(prev => !prev)
 }
@@ -59,24 +41,25 @@ function handlePdfOpen(){
   setIsPdfOpen(prev => !prev)
 }
 
-// function handlePdfClose(){
-//   setIsPdfOpen(false)
-// }
-
 function handleOpenReportDetails(report){
-  setSelectedReport(report);
-  SetisReportDetailsOpen(true)
+  navigate('/reports/details', { state: { report } })
 }
 
-const tableHead = ["CaseNo","Type", "Status", "Tracking", "Date", ""];
-const tableContent=[
-    {id:"A1208", type:"Sexual Harrassment",status:"Pending",},
-    {id:"A2051",type:"Gender-based Violence",status:"Pending",},
-    {id:"A2351",type:"Rape Issues",status:"Pending",},
-    {id:"A2051",type:"Gender-based Violence",status:"Pending",},
-    {id:"A2051",type:"Gender-based Violence",status:"Pending",},
-    {id:"A2051",type:"Gender-based Violence",status:"Pending",},
-]
+const tableHead = ["Case No.", "Type", "Status", "Tracking", "Date", ""];
+const tableContent = [
+    { id: "A1208", type: "Sexual Harassment",    status: "Pending",     date: "02-07-24", width: "10%"  },
+    { id: "A2051", type: "Gender-based violence", status: "Pending",    date: "22-06-24", width: "5%"   },
+    { id: "A1208", type: "Sexual Harassment",    status: "In Progress", date: "02-07-24", width: "35%"  },
+    { id: "A2351", type: "Rape Issues",          status: "Resolved",    date: "12-06-24", width: "80%"  },
+    { id: "A1208", type: "Sexual Harassment",    status: "Pending",     date: "02-07-24", width: "5%"   },
+    { id: "A2351", type: "Rape Issues",          status: "Resolved",    date: "12-06-24", width: "80%"  },
+    { id: "A1208", type: "Sexual Harassment",    status: "Pending",     date: "02-07-24", width: "5%"   },
+    { id: "A1208", type: "Sexual Harassment",    status: "In Progress", date: "02-07-24", width: "35%"  },
+    { id: "A2351", type: "Rape Issues",          status: "Closed",      date: "12-06-24", width: "100%" },
+    { id: "A2051", type: "Gender-based violence", status: "Pending",    date: "22-06-24", width: "5%"   },
+    { id: "A2051", type: "Gender-based violence", status: "In Progress",date: "22-06-24", width: "35%"  },
+    { id: "A1208", type: "Sexual Harassment",    status: "Closed",      date: "02-07-24", width: "100%" },
+];
 // const pdfList=[
   //   {
   //     caseNo:"A1208",
@@ -128,31 +111,32 @@ return (
       </div>
     </div>
 
-  {!isPdfOpen && !isReportDetailsOpen &&
+  {!isPdfOpen &&
     <div className='reports-body'>
-      <table>
-        <thead>
-         <tr>
-          {tableHead.map((value, index) => (
-          <th key={index}>{value}</th>
+      <div className='reports-table-shell'>
+        <table>
+          <thead>
+           <tr>
+            {tableHead.map((value, index) => (
+            <th key={index}>{value}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tableContent.map((value, index)=> (
+                <ReportList
+                  key={index}
+                  id={value.id}
+                  type={value.type}
+                  status={value.status}
+                  date={value.date}
+                  width={value.width}
+                  onOpenDetails={() => handleOpenReportDetails(value)}
+              />
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {tableContent.map((value, index)=> (
-              <ReportList
-                key={index}
-                id={value.id}
-                type={value.type}
-                status={value.status}
-                color={value.color}
-                bgcolor={value.bgcolor}
-                width={value.width}
-                onOpenDetails={() => handleOpenReportDetails(value)}
-            />
-            ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+      </div>
       </div>}
 
 
@@ -191,7 +175,7 @@ return (
 </div>
 </div>}
 
-{isPdfOpen && !isReportDetailsOpen &&
+{isPdfOpen &&
     <div className='pdf-files'>
       {tableContent.map((value, index) =>
       <Pdf 
@@ -205,121 +189,13 @@ return (
       )}
     </div>}
 
-  {isReportDetailsOpen && selectedReport &&
-  <div className='report-details'>
-      <div className='details-header'>
-        <div className='details-header-left'>
-        <button onClick={() => SetisReportDetailsOpen(false)}><IoArrowBackOutline size={24}/></button>
-        <p>Report Details</p>
-        </div>
-        <div className='details-header-right'>
-        <button onClick={() => setIsUpdateModalOpen(prev => !prev)}>Update <IoMdAdd size={24}/></button>
-        <button onClick={handleOpenDownloadModal}><MdOutlineFileDownload size={24}/></button>
-        <button><FaRegFolderOpen size={24} /></button>
-        </div>
-      </div>
-      <div className='report-content'>
-        <p>Case No.
-          <span>{selectedReport.id}</span>
-        </p>
-        <p>Incident type
-          <span>{selectedReport.type}</span>
-        </p>
-        <p>Date of Occurence
-          <span>20th June, 2025</span>
-        </p>
-        <p>Location
-          <span>Faculty of Science, Unilag</span>
-        </p>
-        <p>Description
-          <span>Lorem ipsum dolor sit amet consectetur. Eu nullam sapien quisque quis lorem nulla posuere et. Gravida pharetra vulputate non dictumst euismod. Nulla blandit id diam ut elementum in risus risus. Hac quam nunc nisl sollicitudin tempus. Nulla malesuada pellentesque neque nunc nisl senectus tellus sed. Mauris rhoncus gravida adipiscing risus congue. Ipsum diam platea diam lectus pretium in eu eu non duis. Lorem ipsum dolor sit amet consectetur. Eu nullam sapien quisque quis lorem nulla posuere et.</span>
-        </p>
-        <p>Media
-          <div className='media'>
-          <img src={img1} />
-          <img src={img2} />
-          <img src={audio} />
-          <img src={audio} />
-          <img src={video} />
-          <img src={img3} />
-          <img src={audio} />
-          <img src={img2} />
-          <img src={img3} />
-          </div>
-        </p>
-        <p>Status
-          <span>{selectedReport.status}</span>
-        </p>
-        <p>Tracking
-          <div className='tracking'>
-            <div className='round active'></div>
-            <div className='progress active'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-            <div className='progress'></div>
-            <div className='round'></div>
-          </div>
-        </p>
-      </div>
-  {isDownloadPopupOpen &&
-    <div className='modal-overlay'>
-        <div className='delete-popup'>
-        <div className='close-icon'><IoMdClose size={30} onClick={handleCloseDownloadModal}/></div>
-        <img src={warning} />
-        <p>Download Report</p>
-        <p>This report would be downloaded in pdf format, hence you will have access to it offline. Please note that this report should only be used for official purposes.</p>
-        <div className='buttons'>
-        <button type='submit' onClick={handleCloseDownloadModal}>Cancel</button>
-        <button type='submit'>Start Download</button>
-        </div>
-        </div>
-    </div>}
-  
-  {isUpdateModalOpen && 
-    <div className='modal-overlay'>
-        <div className='update-report'>
-        <div className='close-icon' onClick={() => setIsUpdateModalOpen(false)}><IoArrowBackOutline size={24}/>
-        <p>Update Report</p>
-        </div>
-        <label>Tracking</label>
-        <select>
-          <option>Reporting of case</option>
-          <option>Questioning of victims</option>
-          <option>Referring of victims for selfcare/checkup</option>
-          <option>Submission of case reports to the VC’s office </option>
-          <option>Investigation/interrogation of victims, suspects and witnesses</option>
-          <option>Submission of findings and recommendations to the VC’s office</option>
-          <option>Penalties/Disciplinary Actions</option>
-          <option>Case closed/Submission of final case report to the VC</option>
-        </select>
-        <label>Status</label>
-        <select>
-          <option>Pending</option>
-          <option>In Progress</option>
-          <option>Resolved</option>
-          <option>Closed</option>
-        </select>
-        <button>Update</button>
-        </div>
-    </div>
-  }
-  </div>}
 </div>
     </div>  
   </>
   )
 }
 
-function ReportList({ id, type, status, onOpenDetails }) {
+function ReportList({ id, type, status, date, width, onOpenDetails }) {
 const[isDetailsOpen, setIsDetailsOpen]= useState(false)
 const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
 const [isArchivePopupOpen, setIsArchivePopupOpen] = useState(false)
@@ -355,17 +231,8 @@ function handleCloseArchiveModal(){
   setIsArchivePopupOpen(false)
 }
 
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
-  return `${day}-${month}-${year}`;
-}
-
   let background;
   let color;
-  let width;
 
   if(status === "Resolved"){
     background = "#48C9B01A";
@@ -379,28 +246,30 @@ function formatDate(date) {
   } else if (status === "Closed"){
     background = "#9999991A";
     color = "#999999";
-  } 
+  }
   return (
     <>
-    <tr>
+    <tr onClick={onOpenDetails}>
       <td>{id}</td>
       <td>{type}</td>
-      <td 
-        style={{ color, background }} 
-        className='status'
-      >
-        {status}
+      <td>
+        <span
+          style={{ color, background }}
+          className='status'
+        >
+          {status}
+        </span>
       </td>
       <td>
         <div className='progress-bar'>
-          <div 
-            className='progress' 
-            style={{ width: width}}
+          <div
+            className='progress'
+            style={{ width: width }}
           ></div>
         </div>
       </td>
-      <td>{formatDate(new Date())}</td>
-      <td><button className='icon' onClick={handleOpenDetails}><HiDotsHorizontal /></button></td>
+      <td>{date}</td>
+      <td><button className='icon' onClick={(event) => { event.stopPropagation(); handleOpenDetails(); }}><HiDotsHorizontal /></button></td>
     </tr>
 
     {isDetailsOpen &&

@@ -1,128 +1,168 @@
-.sidebar{
-    display: flex;
-    flex-direction: column;
-    width:15%;
-    height: 100vh;
-    justify-content: space-evenly;
-    align-items: stretch;
-    text-align: center;
-    gap: 10px;
-    position: fixed;
-    padding: 5px;
-}   
+/* Sidebar — matches Trustline design spec */
 
-
-.sidebar button{
-    width: 100%;
-    height: 40px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
-    background-color: #fff;
-    color: #001616;
-    font-size: 15px;
-    font-weight: 400;
-    font-family: "Montserrat", sans-serif;
-    display: flex;
-    gap: 10px;
-    padding: 10px 40px;
-    align-items: center;
-    justify-content: flex-start;
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 13%;
+  min-width: 220px;
+  max-width: 248px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid #d9d9d9;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1.25rem 0.7rem 1.25rem;
+  font-family: 'Montserrat', sans-serif;
+  z-index: 10;
 }
 
-.sidebar button:hover, 
-.sidebar button:focus{
-    background-color: #837AEF;
-    color: #fff;
+.sidebar-top {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-height: 0;
 }
 
-.sidebar .nav-buttons{
-    width: 100%;
-    height: auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-evenly;
-    gap: 10px;
-    justify-content: flex-end;
-    padding-top: 10px;
-}
-
-.sidebar .sidebar-bottom{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    height: 25vh;
-    justify-content: flex-end;
-    padding-top: 10px;
-}
-
-.sidebar .sidebar-bottom .button{
-    width: 95%;
-    height: 40px;
-    border-radius: 8px;
-    cursor: pointer;
-    border: none;
-    background-color: #fff;
-    color: #001616;
-    font-size: 20px;
-    font-weight: 600;
-    font-family: "Montserrat", sans-serif;
-    display: flex;
-    gap: 15px;
-    padding: 10px 50px;
-    align-items: center;
-    justify-content: flex-start;
-    transition: background-color 0.2s ease;
-}
-
-.sidebar .sidebar-bottom .logout{
-    color: #FF0909;
-}
-
-.sidebar .sidebar-bottom .logout:hover{
-    background-color: #FF0909;
-    color: white ;
-}
-
-.sidebar .sidebar-bottom .logout:active{
-    background-color: hsl(0, 100%, 42%);
-    color: hsl(0, 0%, 90%) ; 
-}
-
-button.active {
-    background-color: #837AEF;
-    color: #fff;
-    transition: background-color 0.2s ease;
-}
-
-button.active:hover {
-    background-color: #837AEF;
-    color: #fff;
-}
-
-
-.sidebar.collapsed {
-  width: 10%; /* Small width for icons only */
-}
-
-.sidebar.collapsed button {
-  justify-content: center;
-}
-
-.sidebar.collapsed img.logo-text {
-  display: none;
-}
-
-.sidebar button {
+/* Logo */
+.sidebar-logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.1rem 0 0.75rem;
+  text-decoration: none;
 }
 
+.sidebar-logo-icon {
+  font-size: 1.3rem;
+  color: #837aef;
+  flex-shrink: 0;
+}
 
-.collapse, .logo-text{
-    margin: 0 auto;
+.sidebar-logo-text {
+  font-family: 'Pacifico', cursive;
+  font-size: 1.25rem;
+  color: #837aef;
+  line-height: 1;
+}
+
+/* Nav */
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: #ececf3;
+  border-radius: 4px;
+}
+
+/* Nav link */
+.sidebar-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  height: 38px;
+  padding: 0 0.85rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #001616;
+  font-size: 0.8rem;
+  font-weight: 300;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  text-align: left;
+}
+
+.sidebar-link-icon {
+  font-size: 1.05rem;
+  flex-shrink: 0;
+}
+
+.sidebar-link-label {
+  flex: 1;
+}
+
+.sidebar-link:hover {
+  background-color: #f5f4ff;
+  color: #837aef;
+}
+
+.sidebar-link.active {
+  background-color: #837aef;
+  color: #ffffff;
+}
+
+.sidebar-link.active:hover {
+  background-color: #837aef;
+  color: #ffffff;
+}
+
+/* Badge */
+.sidebar-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background-color: #837aef;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.sidebar-link.active .sidebar-badge {
+  background-color: #ffffff;
+  color: #837aef;
+}
+
+/* Bottom (logout) */
+.sidebar-bottom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #ececf3;
+}
+
+.sidebar-link.logout {
+  color: #ff0909;
+}
+
+.sidebar-link.logout:hover {
+  background-color: #fff0f0;
+  color: #ff0909;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .sidebar {
+    min-width: 220px;
+    max-width: 240px;
+    padding: 1.25rem 0.6rem 1rem;
+  }
+  .sidebar-link {
+    height: 48px;
+    padding: 0 0.85rem;
+    font-size: 0.9rem;
+  }
+  .sidebar-logo-text {
+    font-size: 1.35rem;
+  }
 }

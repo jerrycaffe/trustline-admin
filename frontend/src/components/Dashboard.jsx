@@ -20,6 +20,26 @@ import jane from '../assets/jane.png'
 
 const Dashboard = () => {
   const topTableHead = ["Name", "Type", "Last Login", "Cases"];
+  const reportTypeLegend = [
+    { label: "Gender-based Violence", value: "40%", color: "#FF7C33" },
+    { label: "Sexual Harrassment", value: "45%", color: "#FF3389" },
+    { label: "Rape Issues", value: "15%", color: "#A537FB" },
+  ];
+  const reportStatusLegend = [
+    { label: "Pending", value: "17%", color: "#FED634" },
+    { label: "In Progress", value: "25%", color: "#3DACF5" },
+    { label: "Resolved", value: "43%", color: "#4ECBB2" },
+    { label: "Closed", value: "15%", color: "#999999" },
+  ];
+  const overviewChartOptions = {
+    plugins: {
+      legend: {
+        display: false,
+      },
+    },
+    cutout: '62%',
+    maintainAspectRatio: false,
+  };
   const topTableContents = [
     {
       image: aina,
@@ -51,7 +71,7 @@ const Dashboard = () => {
     },
   ];
 
-  const secondTableHead = ["CaseNo","Type", "Status", "Tracking", "Date",""];
+  const secondTableHead = ["Case No","Type", "Status", "Tracking", "Date",""];
   const secondTableContent=[
     {
       id:"A1208",
@@ -87,7 +107,7 @@ const Dashboard = () => {
     },
   ]
 
-const Dashboard = [
+const dashboardCards = [
   {
     text:"new users",
     number:"20",
@@ -137,7 +157,7 @@ const Dashboard = [
             </button>
           </div>
           <div className="cards">
-        {Dashboard.map((value, index) => (
+        {dashboardCards.map((value, index) => (
           <Dashboardcard
             key={index} 
             text={value.text}
@@ -151,43 +171,45 @@ const Dashboard = [
           </div>
         </div>
 
-        <div className="middle-section">
+        <div className="content-row">
+          <div className="left-column">
+          <div className="users-zen-row">
           <div className="users-section">
-            <div className="users-head">
-              <div className="left">
-                <p>Users</p>
-                <p>See recent user activities</p>
-              </div>
-              <Link to="/users" className="link">
-                <button className="see-all">
-                  See All <FaArrowRightLong />
-                </button>
-              </Link>
+          <div className="users-head">
+            <div className="left">
+              <p>Users</p>
+              <p>See recent user activities</p>
             </div>
+            <Link to="/users" className="link">
+              <button className="see-all">
+                See All <FaArrowRightLong />
+              </button>
+            </Link>
+          </div>
 
-            <div className="users-body">
-              <table>
-                <thead className="thead">
-                  <tr>
-                    {topTableHead.map((value, index) => (
-                      <th key={index}>{value}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {topTableContents.map((value, index) => (
-                    <UsersList
-                      key={index}
-                      image={value.image}
-                      type={value.type}
-                      name={value.name}
-                      lastlogin={value.lastlogin}
-                      cases={value.cases}
-                    />
+          <div className="users-body">
+            <table>
+              <thead className="thead">
+                <tr>
+                  {topTableHead.map((value, index) => (
+                    <th key={index}>{value}</th>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </tr>
+              </thead>
+              <tbody>
+                {topTableContents.map((value, index) => (
+                  <UsersList
+                    key={index}
+                    image={value.image}
+                    type={value.type}
+                    name={value.name}
+                    lastlogin={value.lastlogin}
+                    cases={value.cases}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
           </div>
 
           <div className="zen-section">
@@ -203,51 +225,9 @@ const Dashboard = [
             </div>
             <button>Add New Exercise +</button>
           </div>
-        </div>
+          </div>{/* end users-zen-row */}
 
-        <div className="right-section">
-          <div className="reports-overview">
-            <p>Reports Overview</p>
-            <Doughnut
-              data={{
-                labels: [
-                  "Gender-based Violence",
-                  "Sexual Harrassment",
-                  "Rape Issues",
-                ],
-                datasets: [
-                  {
-                    labels: "Report",
-                    data: [40, 45, 15],
-                    backgroundColor: ["#FF7C33", "#FF3389", "#A537FB"],
-                    borderRadius: 4,
-                  },
-                ],
-              }}
-            />
-            <div className="divider"></div>
-            <Doughnut
-              data={{
-                labels: ["Pending", "In Progress", "Resolved", "Closed"],
-                datasets: [
-                  {
-                    labels: "Report",
-                    data: [17, 25, 43, 15],
-                    backgroundColor: [
-                      "#4ECBB2",
-                      "#3DACF5",
-                      "#FED634",
-                      "#999999",
-                    ],
-                    borderRadius: 4,
-                  },
-                ],
-              }}
-            />
-          </div>
-        </div>
-
-        <div className="bottom-section">
+          <div className="bottom-section">
           <div className="reports-section">
             <div className="reports-head">
               <div className="left">
@@ -285,7 +265,84 @@ const Dashboard = [
               </table>
             </div>
           </div>
-        </div>
+          </div>{/* end bottom-section */}
+          </div>{/* end left-column */}
+
+          <div className="right-section">
+          <div className="reports-overview">
+            <p className="reports-overview-title">Reports Overview</p>
+            <div className="overview-chart-block">
+              <div className="overview-chart-canvas">
+                <Doughnut
+                  options={overviewChartOptions}
+                  data={{
+                    labels: [
+                      "Gender-based Violence",
+                      "Sexual Harrassment",
+                      "Rape Issues",
+                    ],
+                    datasets: [
+                      {
+                        labels: "Report",
+                        data: [40, 45, 15],
+                        backgroundColor: ["#FF7C33", "#FF3389", "#A537FB"],
+                        borderRadius: 4,
+                      },
+                    ],
+                  }}
+                />
+              </div>
+              <div className="overview-legend">
+                {reportTypeLegend.map((item) => (
+                  <div className="overview-legend-item" key={item.label}>
+                    <div className="overview-legend-label">
+                      <span className="overview-legend-swatch" style={{ backgroundColor: item.color }}></span>
+                      <span>{item.label}</span>
+                    </div>
+                    <span className="overview-legend-value">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="divider"></div>
+            <div className="overview-chart-block">
+              <div className="overview-chart-canvas">
+                <Doughnut
+                  options={overviewChartOptions}
+                  data={{
+                    labels: ["Pending", "In Progress", "Resolved", "Closed"],
+                    datasets: [
+                      {
+                        labels: "Report",
+                        data: [17, 25, 43, 15],
+                        backgroundColor: [
+                          "#FED634",
+                          "#3DACF5",
+                          "#4ECBB2",
+                          "#999999",
+                        ],
+                        borderRadius: 4,
+                      },
+                    ],
+                  }}
+                />
+              </div>
+              <div className="overview-legend">
+                {reportStatusLegend.map((item) => (
+                  <div className="overview-legend-item" key={item.label}>
+                    <div className="overview-legend-label">
+                      <span className="overview-legend-swatch" style={{ backgroundColor: item.color }}></span>
+                      <span>{item.label}</span>
+                    </div>
+                    <span className="overview-legend-value">{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+          </div>{/* end right-section */}
+        </div>{/* end content-row */}
+
       </div>
     </div>
   );
@@ -296,7 +353,7 @@ function Dashboardcard({ text, number, percent, image, color, bgcolor }) {
     <>
       <div className="card">
         <div className="card-content">
-          <p>{text.toUpperCase()}</p>
+          <p className="font-22px">{text.toUpperCase()}</p>
           <p>
             {number}{" "}
             <span style={{ color: color, background: bgcolor }}>
@@ -369,8 +426,16 @@ function formatDate(date) {
     <tr>
       <td>{id}</td>
       <td>{type}</td>
-      <td style={{ color: color, background: bgcolor }} className="status">
-        {status}
+      <td className="status-cell">
+        <span
+          className="status-badge"
+          style={{
+            "--status-text": color,
+            "--status-bg": bgcolor,
+          }}
+        >
+          {status}
+        </span>
       </td>
       <td>
         <div className="progress-bar">

@@ -28,6 +28,17 @@
   object-fit: contain;
 }
 
+.login .login-form .logo-text {
+  font-family: 'Pacifico', cursive;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 2.5rem;
+  color: #837AEF;
+  margin: 0;
+  letter-spacing: 0.5px;
+  line-height: 1;
+}
+
 .login .login-form .form {
   width: 100%;
   display: flex;
@@ -52,7 +63,7 @@
 }
 
 .login .login-form .form input,
-.login .login-form .form button {
+.login .login-form .form button[type='submit'] {
   width: 100%;
   height: 38px;
   font-size: 0.8rem;
@@ -65,7 +76,7 @@
   margin-top: 0.25rem;
 }
 
-.login .login-form .form button {
+.login .login-form .form button[type='submit'] {
   background-color: #837AEF;
   border: none;
   box-shadow: 0 2px 8px rgba(131, 122, 239, 0.3);
@@ -78,18 +89,18 @@
   margin-top: 0.5rem;
 }
 
-.login .login-form .form button:hover {
+.login .login-form .form button[type='submit']:hover {
   background-color: #6b63d9;
   box-shadow: 0 4px 12px rgba(131, 122, 239, 0.4);
   transform: translateY(-1px);
 }
 
-.login .login-form .form button:active {
+.login .login-form .form button[type='submit']:active {
   background-color: #5a52c7;
   transform: translateY(0);
 }
 
-.login .login-form .form button:disabled {
+.login .login-form .form button[type='submit']:disabled {
   background-color: #b8b4f0;
   cursor: not-allowed;
   transform: none;
@@ -111,11 +122,15 @@
   text-decoration: underline;
 }
 
+.login .login-form .form p.error {
+  color: #e57373 !important;
+  text-align: left !important;
+}
+
 .login .login-form .form p:last-of-type {
   text-align: center;
   font-size: 0.75rem;
   color: #9ca3af;
-  width: 90%;
   line-height: 1.5;
   margin-top: 0.5rem;
 }
@@ -133,10 +148,13 @@
 }
 
 .error {
-  color: #ef4444;
+  color: #e57373;
   font-size: 0.75rem;
   width: 100%;
   margin: 0;
+  margin-top: 2px;
+  text-align: left;
+  padding-left: 0.75rem;
   font-family: "Montserrat", sans-serif;
 }
 
@@ -154,6 +172,36 @@
   outline: none;
   border-color: #837AEF;
   box-shadow: 0 0 0 3px rgba(131, 122, 239, 0.1);
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.password-wrapper .password-input {
+  width: 100%;
+  padding-right: 2.5rem;
+}
+
+.password-toggle-icon {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #9ca3af;
+  cursor: pointer;
+  user-select: none;
+  line-height: 1;
+}
+
+.password-toggle-icon:hover {
+  color: #837AEF;
 }
 
 .input::placeholder {
@@ -230,7 +278,6 @@
     text-align: center;
     font-size: 16px;
     color: #828282;
-    width: 70%;
 }
 
 .login .login-form .form strong:hover{

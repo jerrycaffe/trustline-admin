@@ -13,7 +13,7 @@ export const api = {
     const result = await response.json();
 
     if (!response.ok || result.error) {
-      throw new Error(result.error.message || result.message || 'Request failed');
+      throw new Error(result.error?.message || result.message || 'Request failed');
     }
 
     return result;
@@ -30,7 +30,7 @@ export const api = {
     const result = await response.json();
 
     if (!response.ok || result.error) {
-      throw new Error(result.error.message || result.message || 'Request failed');
+      throw new Error(result.error?.message || result.message || 'Request failed');
     }
 
     return result;

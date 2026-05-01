@@ -1,200 +1,210 @@
-.incidents{
-    display: flex;
+.incidents {
     position: fixed;
     top: 80px;
-    left: 15%;
+    left: clamp(220px, 13%, 248px);
+    right: 0;
+    width: auto;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
+    display: flex;
     flex-direction: column;
-    width: 85%;
-    height: 100vh;
+    gap: 18px;
+    padding: 24px 56px 48px;
+    background: linear-gradient(180deg, #fafbfe 0%, #f5f7fb 100%);
+}
+
+.incidents .incidents-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.incidents .incidents-head p {
     font-size: 20px;
-    padding: 10px 20px;
-    overflow-y: scroll;
-}
-
-.incidents .incidents-head{
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-}
-
-.incidents .incidents-head p{
-    font-size: 24px;
     font-weight: 600;
+    color: #001616;
 }
 
-.incidents .incidents-head .head-right{
-    width: 20%;
+.incidents .incidents-head .head-right {
     display: flex;
-    gap: 10px;
+    gap: 12px;
     align-items: center;
-    padding: 10px;
 }
 
-.incidents .incidents-head .head-right button{
-    width: 40px;
-    height: 40px;
-    border: 0.5px solid #E0E0E0;
-    display: flex;
-    justify-content: space-between;
+.incidents .incidents-head .head-right button {
+    height: 38px;
+    border: 1px solid #e0e0e0;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-    padding: 0 10px;
+    gap: 7px;
+    padding: 0 12px;
     background-color: #fff;
     cursor: pointer;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 400;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #21343b;
+    transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
 
-.incidents .incidents-head .head-right button:first-of-type{
-    width: 106px;
-    height: 40px;
-    display: flex;
-    align-items: center;
+.incidents .incidents-head .head-right button:hover {
+    background-color: #f4f2ff;
+    border-color: #d9d2ff;
+    color: #6f67ee;
 }
 
-.incidents .incidents-head .head-right button:last-of-type{
-    width: 86px;
-    height: 40px;
-    display: flex;
-    align-items: center;
+.incident-card {
+    width: min(100%, 1120px);
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #ececf3;
+    border-radius: 18px;
+    box-shadow: 0 14px 36px rgba(20, 22, 36, 0.07);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
 }
 
-.incidents .incidents-head .head-right button:hover{
-    background-color: #837AEF;
-    color: #fff;
+.incident-card-header {
+    padding: 16px 18px 8px;
 }
 
-.incidents .incidents-head .head-right button:active{
-    background-color: hsl(0, 0%, 31%);
-    color: #fff;
-}
-
-.incidents .new-report{
-    box-shadow: 0 2px 4px 0 #41414126;
-    border-radius: 8px; 
-    padding: 10px;  
-}
-
-.incidents .new-report p:first-of-type{
-    font-size: 20px;
+.incident-card-header p:first-of-type {
+    font-size: 18px;
     font-weight: 600;
     color: #001616;
 }
 
-.incidents .new-report p:last-of-type{
-    font-size: 16px;
+.incident-card-header p:last-of-type {
+    margin-top: 4px;
+    font-size: 13px;
     font-weight: 400;
-    color: #001616;
-    margin-top: 10px;
+    color: #66767d;
 }
 
-.incidents .new-report table{
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  margin-top: 10px;
+.incident-table-shell {
+    width: 100%;
+    overflow-x: auto;
 }
 
-.incidents .new-report table thead th {
-  text-align: center;
-  padding: 12px 16px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #828282;
+.incident-table-shell table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: #fff;
+    table-layout: fixed;
 }
 
-.incidents .new-report table tbody tr {
-  border-top: 1px solid #E0E0E0;
+.incident-table-shell table thead tr {
+    background: linear-gradient(180deg, #fbfbfe 0%, #f3f5fb 100%);
 }
 
-.incidents .new-report table tbody td {
-padding: 12px 16px;
-font-size: 16px;
-font-weight: 500;
-color: #001616;
-text-align: center; 
-vertical-align: middle;
+.incident-table-shell table thead th {
+    text-align: left;
+    padding: 12px 18px;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    color: #7c8790;
+    border-bottom: 1px solid #ececf3;
+    white-space: nowrap;
 }
 
-.incidents .new-report table tbody td button {
-    width: 180px;
-    height: 41px;
+.new-report table thead th:nth-child(1) { width: 16%; }
+.new-report table thead th:nth-child(2) { width: 40%; }
+.new-report table thead th:nth-child(3) { width: 20%; }
+.new-report table thead th:nth-child(4) { width: 24%; }
+
+.ongoing-cases table thead th:nth-child(1) { width: 14%; }
+.ongoing-cases table thead th:nth-child(2) { width: 26%; }
+.ongoing-cases table thead th:nth-child(3) { width: 14%; }
+.ongoing-cases table thead th:nth-child(4) { width: 16%; }
+.ongoing-cases table thead th:nth-child(5) { width: 30%; }
+
+.incident-table-shell table tbody tr + tr td {
+    border-top: 1px solid #ececf3;
+}
+
+.incident-table-shell table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.incident-table-shell table tbody tr:hover {
+    background-color: #f8f9fd;
+}
+
+.incident-table-shell table tbody td {
+    padding: 14px 18px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #21343b;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.incident-table-shell table tbody td:first-child {
+    font-weight: 600;
+    color: #163238;
+}
+
+.incident-view-btn {
+    min-width: 88px;
+    height: 32px;
     border-radius: 8px;
-    background-color: #837AEF;
-    font-size: 17px;
+    background: linear-gradient(90deg, #8b83f4 0%, #6f67ee 100%);
+    font-size: 12px;
+    font-weight: 500;
     color: #fff;
     border: none;
     cursor: pointer;
+    transition: filter 0.15s ease;
 }
 
-.incidents .new-report table tbody td button:hover {
-    background-color: hsl(245, 79%, 61%);
+.incident-view-btn:hover {
+    filter: brightness(0.97);
 }
 
-.incidents .new-report table tbody td button:active {
- background-color: hsl(0, 0%, 31%);;
+.ongoing-cases {
+    margin-bottom: 40px;
 }
 
-.incidents .ongoing-cases{
-    margin-top: 20px;
-    margin-bottom: 100px;
-    padding: 10px;
-    border-radius: 9px;
-    box-shadow: 0 2px 4px 0 #41414126;
+.ongoing-cases .status {
+    min-width: 88px;
+    height: 24px;
+    padding: 0 10px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 500;
 }
 
-.ongoing-cases .cases p:first-of-type{
-    font-size: 20px;
-    font-weight: 600;
-    color: #001616;
-}
-
-.ongoing-cases .cases p:last-of-type{
-    font-size: 16px;
+.ongoing-cases .text {
+    font-size: 12px;
     font-weight: 400;
-    color: #001616;
-    margin-top: 10px;
+    color: #4a5d65;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.ongoing-cases .cases table{
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #fff;
-  margin-top: 10px
-}
+@media (max-width: 1024px) {
+    .incidents {
+        padding: 24px 24px 40px;
+    }
 
-.ongoing-cases .cases table thead th {
-  text-align: center;
-  padding: 12px 16px;
-  font-weight: 600;
-  font-size: 14px;
-  color: #828282;
-}
+    .incidents .incidents-head {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 
-.ongoing-cases .cases table tbody tr {
-  border-top: 1px solid #E0E0E0;
-}
-
-.ongoing-cases .cases table tbody td {
-  padding: 20px 16px;
-  font-size: 16px;
-  font-weight: 500;
-  color: #001616;
-    text-align: center; 
-  vertical-align: middle;
-}
-
-.ongoing-cases .status{
-    border-radius: 58px;
-    background-color: #3DACF51A;
-    color: #3DACF5;
-}
-
-.ongoing-cases .text{
-    font-size: 16px;
-    font-weight: 400;
-    color: #001616;
-    text-align: center;
+    .incident-card {
+        width: 100%;
+    }
 }
 

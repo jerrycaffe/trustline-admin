@@ -1,160 +1,422 @@
-.zen{
-    display: flex;
-    position: fixed;
-    top: 80px;
-    left: 15%;
-    flex-direction: column;
-    width: 85%;
-    height: 100vh;
-    font-size: 20px;
-    padding: 10px 20px;
-    overflow-y: scroll;
-}
-.zen .header{
-    font-size: 24px;
-    font-weight: 600;
-    color: #001616;
+/* ── Shell ── */
+.zen {
+  position: fixed;
+  top: 80px;
+  left: clamp(220px, 13%, 248px);
+  right: 0;
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+  padding: 22px 40px 48px;
+  background: #f5f7fb;
 }
 
-.zen .top-section{
-    margin-top: 20px;
-    display: flex;
-    justify-content: space-evenly;
+/* ── Page heading ── */
+.zen-heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0b2328;
+  margin-bottom: 12px;
 }
 
-.top-section .mood-tracker,
-.top-section .most-played{
-    width: 305px;
-    height: 350px;
-    padding: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    box-shadow: 0 2px 4px 0 #41414126;
-    border-radius: 9px;
-    padding: 10px;
+/* ── Top 3-card row ── */
+.zen-top {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
 }
 
-.head{
-    display: flex;
-    justify-content: space-between;
+.zen-card {
+  background: #ffffff;
+  border: 1px solid #e4e6ef;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(20, 22, 36, 0.05);
+  padding: 12px 14px 12px;
+}
+
+/* ── Card shared typography ── */
+.zen-card-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #1d3035;
+  margin: 0;
+}
+
+.zen-card-title.centered {
+  text-align: center;
+}
+
+.zen-card-sub {
+  font-size: 11px;
+  font-weight: 400;
+  color: #5a6b72;
+  margin: 2px 0 0;
+}
+
+.zen-card-sub.centered {
+  text-align: center;
+}
+
+/* ── Mood Tracker ── */
+.zen-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.zen-card-head select {
+  height: 30px;
+  width: 76px;
+  border: 1px solid #d4d6e0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 12px;
+  color: #2a3a41;
+  padding: 0 6px;
+  flex-shrink: 0;
+}
+
+.mood-chart {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  height: 160px;
+}
+
+.mood-y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  width: 22px;
+}
+
+.mood-y-axis span {
+  font-size: 10px;
+  color: #9aa1a8;
+  text-align: right;
+}
+
+.mood-bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  border-left: 1px solid #e4e5ea;
+  border-bottom: 1px solid #e4e5ea;
+  padding: 0 0 0 6px;
+}
+
+.mood-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.mood-emoji {
+  font-size: 14px;
+  line-height: 1;
+}
+
+.mood-bar {
+  width: 100%;
+  border-radius: 4px 4px 0 0;
+  min-height: 4px;
+}
+
+.mood-day {
+  font-size: 10px;
+  color: #9aa1a8;
+  margin-top: 4px;
+}
+
+/* ── Most Played ── */
+.played-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.donut-wrap {
+  width: 110px;
+  height: 90px;
+  margin: 8px auto 10px;
+}
+
+.legend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 0 4px;
+}
+
+.legend-row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.legend-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  display: block;
+}
+
+.legend-label {
+  font-size: 12px;
+  color: #2a3a41;
+}
+
+.legend-pct {
+  font-size: 12px;
+  color: #2a3a41;
+  font-weight: 500;
+}
+
+/* ── Funnel ── */
+.funnel-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.funnel-shape {
+  display: flex;
+  align-items: center;
+  height: 72px;
+  margin: 8px 0 6px;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.fseg {
+  height: 100%;
+}
+
+.s1 {
+  width: 42%;
+  background: #264f97;
+  clip-path: polygon(0 12%, 100% 20%, 100% 80%, 0 88%);
+}
+
+.s2 {
+  width: 30%;
+  background: #6d87b4;
+  clip-path: polygon(0 20%, 100% 22%, 100% 78%, 0 80%);
+}
+
+.s3 {
+  width: 28%;
+  background: #b4c0d3;
+  clip-path: polygon(0 22%, 100% 28%, 100% 72%, 0 78%);
+}
+
+.funnel-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.fstat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.fstat strong {
+  font-size: 16px;
+  font-weight: 700;
+  color: #19292e;
+}
+
+.fstat span {
+  font-size: 10px;
+  color: #55646b;
+  line-height: 1.2;
+}
+
+.funnel-nav {
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-top: 1px solid #ececf3;
+  padding-top: 8px;
+}
+
+.funnel-nav p {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1f3137;
+}
+
+.funnel-nav span {
+  font-size: 18px;
+  color: #555e64;
+  line-height: 1;
+  cursor: pointer;
+}
+
+/* ── Bottom section ── */
+.zen-bottom {
+  margin-top: 14px;
+  background: #ffffff;
+  border: 1px solid #e4e6ef;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(20, 22, 36, 0.05);
+}
+
+.zen-bottom-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid #ececf3;
+}
+
+.zen-bottom-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #1d3035;
+  margin: 0;
+}
+
+.zen-bottom-sub {
+  font-size: 11px;
+  color: #5a6b72;
+  margin: 2px 0 0;
+}
+
+.zen-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 8px;
+  background: #837aef;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.zen-add-btn:hover {
+  filter: brightness(0.95);
+}
+
+/* ── Exercise rows ── */
+.zen-exercise-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.zen-exercise-row {
+  display: grid;
+  grid-template-columns: 140px 1fr 32px;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-bottom: 1px solid #ececf3;
+}
+
+.zen-exercise-row:last-child {
+  border-bottom: none;
+}
+
+.ze-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+}
+
+.ze-left img {
+  width: 120px;
+  height: 76px;
+  object-fit: contain;
+}
+
+.ze-left p {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1e2e34;
+}
+
+.ze-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ze-desc {
+  font-size: 12px;
+  color: #2a3a41;
+  line-height: 1.45;
+}
+
+.ze-meta {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 24px;
+}
+
+.ze-meta p {
+  font-size: 12px;
+  color: #2a3a41;
+}
+
+.ze-meta p span {
+  font-weight: 500;
+}
+
+.ze-menu {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: #3a4b51;
+  cursor: pointer;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ze-menu:hover {
+  background: #f2f3f8;
+}
+
+/* ── Responsive ── */
+@media (max-width: 1200px) {
+  .zen-top {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 960px) {
+  .zen {
+    padding: 18px 20px 36px;
+  }
+  .zen-top {
+    grid-template-columns: 1fr;
+  }
+  .zen-exercise-row {
+    grid-template-columns: 1fr;
+  }
+  .ze-left {
+    flex-direction: row;
+    text-align: left;
     align-items: center;
-    padding: 10px 0 ;
-    border-bottom: 0.5px solid #E0E0E0;
+  }
+  .ze-meta {
+    grid-template-columns: 1fr;
+  }
 }
-
-.head p{
-    font-size: 20px;
-    font-weight: 600;
-    color: #001616;
-    display: flex;
-    flex-direction: column;
-}
-
-.head p span{
-    font-size: 16px;
-    font-weight: 400;
-    color: #001616;
-}
-
-.top-section .mood-tracker .head select{
-    border: 2px solid black;
-    width: 103px;
-    height: 32px;
-    font-size: 15px;
-    font-weight: 500;
-    color: #001616;
-    border: 4px;
-}
-
-.top-section .mood-tracker .bar-chart,
-.top-section .most-played .pie-chart{
-    width: 100%;
-    height: 80% ;
-    margin: 0 auto;
-}
-
-.most-played .header{
-    font-size: 20px;
-    font-weight: 600;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    padding: 10px 0 ;
-}
-
-.most-played .header span{
-    font-size: 16px;
-    font-weight: 400;
-}
-
-.zen .bottom-section{
-    width: 100%;
-    box-shadow: 0 2px 4px 0 #41414126;
-}
-
-.bottom-section .head button{
-    width: 117px;
-    height: 40px;
-    background-color: #837AEF;
-    border: 0.5px solid #D9D9D9;
-    border-radius: 8px;
-    font-size: 16px;
-    font-weight: 500;
-    color: #FBFBFB;
-    cursor: pointer;
-}
-
-.bottom-section .head button:active{
-    background-color: hsl(245, 79%, 61%);
-}
-
-.bottom-section .zen-exercises{
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.bottom-section .zen-exercises .zen-exercise{
-    display: flex;
-    align-items: center;
-    justify-content: space-evenly;
-    gap: 20px;
-    border-bottom: 0.5px solid #E0E0E0;
-    padding: 10px 0;
-    position: relative;
-}
-
-.bottom-section .zen-exercises .zen-exercise .content p{
-    font-size: 16px;
-    font-weight: 500;
-    color: #001616;
-    margin-top: 10px;
-}
-
-.bottom-section .zen-exercises .zen-exercise .content .bottom{
-    width: 80%;
-    display: flex;
-    justify-content: space-between;
-    padding: 5px;
-}
-
-.bottom-section .zen-exercises .zen-exercise button{
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-}
-
-.bottom-section .zen-exercises .zen-exercise button:hover{
-    background-color: #837AEF;
-    color: #FBFBFB;
-}
-
-.bottom-section .zen-exercises .zen-exercise button:active{
-    background-color: hsl(245, 79%, 61%);
-    color: #FBFBFB;
-}
-

@@ -6,51 +6,66 @@ import '../css/Incidents.css'
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 import { IoIosRefresh } from "react-icons/io";
 
+function formatDate(date) {
+  const day = String(date.getDate()).padStart(2, '0')
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const year = String(date.getFullYear()).slice(-2)
+  return `${day}-${month}-${year}`
+}
+
 const Incidents = () => {
-  const newReportHead =["CaseNo", "Type", "Date", ""]
+  const newReportHead =["Case No.", "Type", "Date", ""]
   const newReportContent =[
   {
     id:"A1208",
-    type:"Sexual Harrassment"
+    type:"Sexual Harassment",
+    date: "02-07-24"
   },
   {
     id:"A2051",
-    type:"Gender-based Violence"
+    type:"Gender-based violence",
+    date: "22-06-24"
   },
   {
     id:"A2351",
-    type:"Rape Issues"
+    type:"Rape Issues",
+    date: "12-06-24"
   },
   {
     id:"A2351",
-    type:"Rape Issues"
+    type:"Rape Issues",
+    date: "12-06-24"
   },
 ]
 
-  const ongoingCasesHead = ["CaseNo", "Type", "Date", "Status", "Tracking"]
+  const ongoingCasesHead = ["Case No.", "Type", "Date", "Status", "Tracking"]
   const OngoingCasesContent = [
     {
       id:"A1208",
-      type:"Sexual Harrassment",
+      type:"Sexual Harassment",
+      date: "02-07-24",
       text:"Questioning of victims",
       status: "In Progress",
     },
     { 
       id:"A2051",
-      type:"Gender-based Violence",
+      type:"Gender-based violence",
+      date: "22-06-24",
       text:"Referring of victims for selfcare/checkup",
       status: "In Progress",
     },
     {
       id:"A2351",
       type:"Rape Issues",
+      date: "12-06-24",
       text:"Referring of victims for selfcare/checkup",
       status: "In Progress",
     },
     { 
       id:"A2351",
       type:"Rape Issues",
-      text:"Referring of victims for selfcare/checkup",
+      date: "12-06-24",
+      text:"Submission of case reports to the VC's office",
       status: "In Progress"
     }
   ]
@@ -63,59 +78,67 @@ const Incidents = () => {
       <div className='incidents-head'>
         <p>Incidents Management</p>
       <div className="head-right">
-        <button><IoIosRefresh size={24}/>Refresh</button>
-        <button><HiOutlineAdjustmentsVertical size={24}/>Filter</button>
+        <button><IoIosRefresh size={18}/>Refresh</button>
+        <button><HiOutlineAdjustmentsVertical size={18}/>Filter</button>
       </div>
       </div>
 
-      <div className='new-report'>
-        <p>New Report</p>
-        <p>See new reports as they come in</p>
-        <table>
-          <thead>
-            <tr>
-            {newReportHead.map((value, index) => (
-              <th key={index}>{value}</th>
-            ))}
-            </tr>
-          </thead>
-          <tbody>
-          {newReportContent.map((value, index) => (
-            <Newreport
-              key={index}
-              id={value.id}
-              type={value.type}
-            />
-          ))}
-          </tbody>
-        </table>
-      </div>
-
-        <div className='ongoing-cases'>
-        <div className='cases'>
-        <p>Ongoing Cases</p>
-        <p>See the status of ongoing cases</p>
-        <table>
-          <thead>
-            <tr>
-              {ongoingCasesHead.map((value, index) => (
+      <div className='incident-card new-report'>
+        <div className='incident-card-header'>
+          <p>New Reports</p>
+          <p>See new reports as they come in</p>
+        </div>
+        <div className='incident-table-shell'>
+          <table>
+            <thead>
+              <tr>
+              {newReportHead.map((value, index) => (
                 <th key={index}>{value}</th>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-          {OngoingCasesContent.map((value, index) => (
-            <OngoingCases 
-              key={index}
-              id={value.id}
-              type={value.type}
-              text={value.text}
-              status={value.status}
-            />
+              </tr>
+            </thead>
+            <tbody>
+            {newReportContent.map((value, index) => (
+              <Newreport
+                key={index}
+                id={value.id}
+                type={value.type}
+                date={value.date}
+              />
             ))}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+        </div>
       </div>
+
+        <div className='incident-card ongoing-cases'>
+        <div className='incident-card-header'>
+          <p>Ongoing Cases</p>
+          <p>See the status of ongoing cases</p>
+        </div>
+        <div className='incident-table-shell'>
+          <table>
+            <thead>
+              <tr>
+                {ongoingCasesHead.map((value, index) => (
+                  <th key={index}>{value}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+            {OngoingCasesContent.map((value, index) => (
+              <OngoingCases 
+                key={index}
+                id={value.id}
+                type={value.type}
+                date={value.date}
+                text={value.text}
+                status={value.status}
+              />
+              ))}
+            </tbody>
+          </table>
+        </div>
         </div>
        
       </div>
@@ -124,22 +147,14 @@ const Incidents = () => {
   )
 }
 
-function Newreport({id, type}){
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
-  return `${day}-${month}-${year}`;
-}
-
+function Newreport({id, type, date}){
   return(
     <>
     <tr>
     <td>{id}</td>
     <td>{type}</td>
-    <td>{formatDate(new Date())}</td>
-    <td><button>View</button></td>
+    <td>{date}</td>
+    <td><button className='incident-view-btn'>View</button></td>
     </tr>
     </>
 
@@ -147,15 +162,7 @@ function formatDate(date) {
 
 }
 
-function OngoingCases({id, type, text, status}){
-
-function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
-  return `${day}-${month}-${year}`;
-}
+function OngoingCases({id, type, date, text, status}){
 
 let background;
 let color;
@@ -178,8 +185,8 @@ let color;
     <tr>
     <td>{id}</td>
     <td>{type}</td>
-    <td>{formatDate(new Date())}</td>
-    <td><div className='status' style={{background, color}}>{status}</div></td>
+    <td>{date}</td>
+    <td><span className='status' style={{background, color}}>{status}</span></td>
     <td><div className='text'>{text}</div></td>
     </tr>
     </>

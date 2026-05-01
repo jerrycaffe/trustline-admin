@@ -13,13 +13,50 @@ import { FaRegFolderOpen } from "react-icons/fa";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { IoMdClose, IoMdAdd } from "react-icons/io";
 
+const demoResources = [
+  {
+    id: 1001,
+    title: 'What is Gender-based Violence?',
+    category: 'Gender-based Violence',
+    content:
+      'Gender-based violence (GBV) is any harmful act directed at a person based on gender. It can include physical abuse, sexual abuse, emotional intimidation, economic control, threats, coercion, and deprivation of liberty in both public and private spaces. GBV affects people of all backgrounds and is often rooted in unequal power dynamics.\n\nIn a campus or workplace context, GBV may appear as harassment, stalking, coercive relationships, assault, or retaliatory behavior after reporting. Early reporting, survivor-centered response, and clear referral pathways are key to prevention and recovery.',
+    createdAt: new Date('2024-08-03').getTime(),
+  },
+  {
+    id: 1002,
+    title: 'How to Support Survivors Respectfully',
+    category: 'Sexual Harassment',
+    content:
+      'When someone shares an experience of abuse, begin by listening without judgment. Avoid blaming language, avoid forcing details, and let the survivor set the pace. Focus on safety, consent, confidentiality, and practical options.\n\nHelpful responses include: "I believe you," "This was not your fault," and "How can I support you right now?" Offer available channels such as counseling, medical care, legal support, and formal reporting mechanisms while respecting the survivor\'s decision-making.',
+    createdAt: new Date('2024-07-21').getTime(),
+  },
+  {
+    id: 1003,
+    title: 'Reporting Process and Case Tracking',
+    category: 'Rape Issues',
+    content:
+      'A standard response workflow includes: intake, immediate safety assessment, evidence guidance, referral to support services, investigation, committee review, and final resolution with documented outcomes.\n\nClear status tracking should communicate exactly where a case sits at every stage. Recommended statuses include: Pending Intake, In Progress, Awaiting Decision, Resolved, and Closed. Each stage should include owner, expected timeline, and survivor communication checkpoints.',
+    createdAt: new Date('2024-06-12').getTime(),
+  },
+];
+
 const Resources = () => {
   const [isAddFileOpen, setIsAddFileOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editFileId, setEditFileId] = useState(null);
   const [resources, setResources] = useState(() => {
     const saved = localStorage.getItem("resources");
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return demoResources;
+
+    try {
+      const parsed = JSON.parse(saved);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        return demoResources;
+      }
+      return parsed;
+    } catch {
+      return demoResources;
+    }
   });
   const [newFile, setNewFile] = useState({ title: "", category: "", content: "" });
   const [selectedResource, setSelectedResource] = useState(null);
@@ -30,6 +67,12 @@ const Resources = () => {
   useEffect(() => {
     localStorage.setItem("resources", JSON.stringify(resources));
   }, [resources]);
+
+  useEffect(() => {
+    if (!selectedResource && resources.length > 0) {
+      setSelectedResource(resources[0]);
+    }
+  }, [resources, selectedResource]);
 
   
   function handleOpenAddfile() {
@@ -58,35 +101,30 @@ function handleAddOrEditFile(e) {
   }
 
   if (isEditing && editFileId) {
-    // Edit mode
     setResources(prev => {
       const updated = prev.map(file =>
         file.id === editFileId ? { ...file, ...newFile } : file
       );
 
-      // Update selectedResource from the updated array
       const updatedFile = updated.find(file => file.id === editFileId);
       setSelectedResource(updatedFile);
 
       return updated;
     });
   } else {
-    // Add mode
-    const fileWithId = { id: Date.now(), ...newFile };
+    const fileWithId = { id: Date.now(), createdAt: Date.now(), ...newFile };
     setResources(prev => {
       const updated = [...prev, fileWithId];
       setSelectedResource(fileWithId);
       return updated;
     });
 
-    // Show success popup
     setIsSuccessPopupOpen(true);
     setTimeout(() => {
       setIsSuccessPopupOpen(false);
     }, 1000);
   }
 
-  // Reset form and close modal
   setNewFile({ title: "", category: "", content: "" });
   handleCloseAddfile();
 }
@@ -111,56 +149,64 @@ function handleAddOrEditFile(e) {
         <Searchbar />
         <Sidebar />
         <div className='resources'>
-          {/* LEFT SIDE */}
-          <div className='left-side'>
-            <div className='left-header'>
-              <p>Resources</p>
-              <button type='button' onClick={handleOpenAddfile}>Add New  <IoMdAdd/></button>
-            </div>
-            <div className='files'>
-              {resources.map((res) => (
-                <Resource
-                  key={res.id}
-                  title={res.title}
-                  onClick={() => setSelectedResource(res)}
-                />
-              ))}
-            </div>
+          <div className='resources-header'>
+            <p>Resources</p>
+            <button type='button' onClick={handleOpenAddfile}>Add new <IoMdAdd/></button>
           </div>
 
-          {/* RIGHT SIDE */}
-          <div className='right-side'>
-            {selectedResource ? (
-              <>
-                <div className='right-header'>
-                  <p>
-                    <CiStar className='icon' style={{ fill: '#FF7C33' }} size={24} />
-                    <span>{selectedResource.category}</span>
-                  </p>
-                  <div className='header-right'>
-                    <CiEdit
-                      className='icon'
-                      size={24}
-                      style={{ cursor: "pointer" }}
-                      onClick={() => handleEditClick(selectedResource)}
-                    />
-                    <FaRegFolderOpen className='icon' size={24} />
-                    <RiDeleteBin6Line
-                      className='icon'
-                      size={24}
-                      style={{ cursor: "pointer" }}
-                      onClick={handleOpenDeleteModal}
-                    />
+          <div className='resources-main'>
+            <div className='left-side'>
+              <div className='left-header'>
+                <p>All Files</p>
+              </div>
+              <div className='files'>
+                {resources.map((res) => (
+                  <Resource
+                    key={res.id}
+                    title={res.title}
+                    createdAt={res.createdAt}
+                    isActive={selectedResource?.id === res.id}
+                    onClick={() => setSelectedResource(res)}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className='right-side'>
+              {selectedResource ? (
+                <>
+                  <div className='right-header'>
+                    <p>
+                      <CiStar className='icon' style={{ fill: '#FF7C33' }} size={22} />
+                      <span>{selectedResource.category}</span>
+                    </p>
+                    <div className='header-right'>
+                      <CiEdit
+                        className='icon'
+                        size={22}
+                        style={{ cursor: "pointer" }}
+                        onClick={() => handleEditClick(selectedResource)}
+                      />
+                      <FaRegFolderOpen className='icon' size={20} />
+                      <RiDeleteBin6Line
+                        className='icon'
+                        size={22}
+                        style={{ cursor: "pointer" }}
+                        onClick={handleOpenDeleteModal}
+                      />
+                    </div>
                   </div>
+                  <div className='right-body'>
+                    <h1>{selectedResource.title}</h1>
+                    <p>{selectedResource.content}</p>
+                  </div>
+                </>
+              ) : (
+                <div className='empty-state'>
+                  <p>Select a resource on the left to view content.</p>
                 </div>
-                <div className='right-body'>
-                  <h1>{selectedResource.title}</h1>
-                  <p>{selectedResource.content}</p>
-                </div>
-              </>
-            ) : (
-              <p>Select a file to view details</p>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -231,22 +277,22 @@ function handleAddOrEditFile(e) {
   );
 };
 
-function Resource({ title, onClick }) {
+function Resource({ title, createdAt, isActive, onClick }) {
 function formatDate(date) {
-  const d = new Date(date);
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const year = String(d.getFullYear()).slice(-2); // 25 for 2025
-  return `${day}-${month}-${year}`;
+  return new Intl.DateTimeFormat('en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(date));
 }
   const truncatedTitle = title.length > 25 ? title.slice(0, 25) + "..." : title;
 
   return (
-    <div className='file' onClick={onClick}>
+    <div className={`file ${isActive ? 'active' : ''}`} onClick={onClick}>
       <div className='file-left'><GrDocumentPdf size={30} /></div>
       <div className='file-right'>
         <p>{truncatedTitle}</p>
-        <p><span className='date'>{formatDate(new Date())}</span></p>
+        <p><span className='meta'>22mb • {formatDate(createdAt || Date.now())}</span></p>
       </div>
     </div>
   );
