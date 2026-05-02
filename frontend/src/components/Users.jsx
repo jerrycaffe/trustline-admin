@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import '../css/Users.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -15,6 +15,7 @@ import { IoMdAdd } from "react-icons/io";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 
 const Users = () => {
+  const location = useLocation()
   const navigate = useNavigate()
 
   const tableHead = ["Name","Type","Date Registered","Last Login","Ongoing Cases","Closed Cases", ""]
@@ -136,7 +137,8 @@ const secondTableContent = [
 ]
 
 function handleOpenUserDetails(user) {
-  navigate('/users/details', { state: { user } })
+  const sourcePath = `${location.pathname}${location.search}${location.hash}`
+  navigate('/users/details', { state: { user, from: sourcePath } })
 }
 
   return (

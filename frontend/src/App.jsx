@@ -6,6 +6,7 @@ import ResetPassword from './components/ResetPassword'
 import Dashboard from './components/Dashboard'
 import Reports from './components/Reports'
 import ReportDetails from './components/ReportDetails'
+import ReportChat from './components/ReportChat'
 import Incidents from './components/Incidents'
 import Users from './components/Users'
 import UserDetails from './components/UserDetails'
@@ -29,6 +30,7 @@ const App = () => {
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/reports' element={<Reports />} />
         <Route path='/reports/details' element={<ReportDetails />} />
+        <Route path='/reports/chat' element={<ReportChat />} />
         <Route path='/incidents' element={<Incidents />} />
         <Route path='/users' element={<Users />} />
         <Route path='/users/details' element={<UserDetails />} />

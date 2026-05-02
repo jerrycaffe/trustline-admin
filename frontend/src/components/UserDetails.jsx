@@ -9,6 +9,7 @@ const UserDetails = () => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const user = state?.user
+  const returnTo = state?.from || '/users'
 
   if (!user) {
     return <Navigate to="/users" replace />
@@ -20,7 +21,7 @@ const UserDetails = () => {
       <Sidebar />
       <div className='user-details'>
         <div className='user-details-header'>
-          <button className='user-details-back' onClick={() => navigate('/users')}>
+          <button className='user-details-back' onClick={() => navigate(returnTo)}>
             <IoArrowBackOutline size={20} />
           </button>
           <p>User details</p>
