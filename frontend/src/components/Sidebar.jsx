@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../css/Sidebar.css';
 import { FaRegFileLines, FaRegUser } from 'react-icons/fa6';
 import { RxDashboard } from 'react-icons/rx';
-import { BiPieChartAlt2, BiSupport, BiLogOut, BiErrorCircle } from 'react-icons/bi';
+import { BiPieChartAlt2, BiSupport, BiLogOut } from 'react-icons/bi';
 import { RiStackLine } from 'react-icons/ri';
 import { FaHandHoldingHeart } from 'react-icons/fa';
 import { IoIosSettings } from 'react-icons/io';
@@ -12,7 +12,6 @@ import TrustlineLogo from './TrustlineLogo';
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: RxDashboard },
   { label: 'Reports', path: '/reports', icon: FaRegFileLines },
-  { label: 'Incidents', path: '/incidents', icon: BiErrorCircle },
   { label: 'Users', path: '/users', icon: FaRegUser },
   { label: 'Resources', path: '/resources', icon: RiStackLine },
   { label: 'Analytics', path: '/analytics', icon: BiPieChartAlt2 },
