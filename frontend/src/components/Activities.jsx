@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import 'chart.js/auto'
 import { Doughnut } from 'react-chartjs-2'
-import '../css/Zen.css'
+import '../css/Activities.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import { IoMdAdd } from 'react-icons/io'
@@ -34,7 +34,7 @@ const exercises = [
 
 const MAX_VALUE = 30
 
-const Zen = () => {
+const Activities = () => {
   const [timeRange, setTimeRange] = useState('weekly')
 
   return (
@@ -42,7 +42,7 @@ const Zen = () => {
       <Searchbar />
       <Sidebar />
       <div className='zen'>
-        <p className='zen-heading'>Zen Dashboard</p>
+        <p className='zen-heading'>Activities Dashboard</p>
 
         <div className='zen-top'>
           {/* Mood Tracker */}
@@ -149,14 +149,14 @@ const Zen = () => {
         <div className='zen-bottom'>
           <div className='zen-bottom-head'>
             <div>
-              <p className='zen-bottom-title'>Current Zen Exercises</p>
-              <p className='zen-bottom-sub'>Edit, add and remove zen exercises</p>
+              <p className='zen-bottom-title'>Current Activities</p>
+              <p className='zen-bottom-sub'>Edit, add and remove healing activities</p>
             </div>
             <button className='zen-add-btn'>Add new <IoMdAdd /></button>
           </div>
           <div className='zen-exercise-list'>
             {exercises.map((ex) => (
-              <ZenExercise key={ex.title} image={ex.image} title={ex.title} />
+              <ActivityItem key={ex.title} image={ex.image} title={ex.title} />
             ))}
           </div>
         </div>
@@ -165,7 +165,7 @@ const Zen = () => {
   )
 }
 
-function ZenExercise({ image, title }) {
+function ActivityItem({ image, title }) {
   return (
     <div className='zen-exercise-row'>
       <div className='ze-left'>
@@ -192,4 +192,4 @@ function ZenExercise({ image, title }) {
   )
 }
 
-export default Zen
+export default Activities

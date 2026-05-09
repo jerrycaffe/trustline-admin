@@ -4,15 +4,9 @@ import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import '../css/Reports.css'
 
-import warning from '../assets/warningOrangeBg.png'
-
-import { HiDotsVertical } from "react-icons/hi";
-import { RxDashboard } from "react-icons/rx";
 import { FaLongArrowAltDown, FaLongArrowAltUp } from "react-icons/fa";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
-import { GrDocumentPdf } from "react-icons/gr";
-import { RxHamburgerMenu } from "react-icons/rx";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const SORT_FIELDS = [
@@ -31,7 +25,6 @@ const Reports = () => {
 
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isSortOpen,   setIsSortOpen]   = useState(false)
-  const [isPdfOpen,    setIsPdfOpen]    = useState(false)
 
   const [sortField, setSortField] = useState('date')
   const [sortDir,   setSortDir]   = useState('desc')
@@ -41,8 +34,31 @@ const Reports = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
 
-  function handleFilterOpen()  { setIsFilterOpen(prev => !prev) }
+  const [filters, setFilters] = useState({
+    type: '',
+    status: '',
+    date: '',
+  })
+
+  function handleFilterOpen()  { setIsFilterOpen(true) }
   function handleFilterClose() { setIsFilterOpen(false) }
+  
+  function handleFilterChange(event) {
+    const { name, value } = event.target
+    setFilters(prev => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+  
+  function handleResetFilters() {
+    setFilters({ type: '', status: '', date: '' })
+  }
+  
+  function handleApplyFilters(event) {
+    event.preventDefault()
+    handleFilterClose()
+  }
 
   function handleSortOpen() {
     setPendingSortField(sortField)
@@ -56,8 +72,6 @@ const Reports = () => {
     setCurrentPage(1)
     setIsSortOpen(false)
   }
-
-  function handlePdfOpen() { setIsPdfOpen(prev => !prev) }
 
   function handleOpenReportDetails(report) {
     const sourcePath = `${location.pathname}${location.search}${location.hash}`
@@ -117,17 +131,13 @@ const Reports = () => {
               <button onClick={handleSortOpen} aria-label="Sort">
                 <FaLongArrowAltUp size={18}/><FaLongArrowAltDown size={18}/>
               </button>
-              <button onClick={handlePdfOpen} aria-label="Toggle view">
-                {!isPdfOpen ? <RxDashboard size={20}/> : <RxHamburgerMenu size={20}/>}
-              </button>
               <button onClick={handleFilterOpen}>
                 <HiOutlineAdjustmentsVertical size={20}/>Filter
               </button>
             </div>
           </div>
 
-          {!isPdfOpen && (
-            <div className='reports-body'>
+          <div className='reports-body'>
               <div className='reports-table-shell'>
                 <table>
                   <thead>
@@ -209,31 +219,64 @@ const Reports = () => {
                 </div>
               </div>
             </div>
-          )}
 
           {isFilterOpen && (
-            <div className='modal-overlay' onClick={handleFilterClose}>
-              <div className='filter-card' onClick={e => e.stopPropagation()}>
-                <div onClick={handleFilterClose} className='close-icon'><IoMdClose size={30}/></div>
-                <p>Apply filter(s):</p>
-                <div className='options'>
-                  <Filtercard text="Gender-based Violence"/>
-                  <Filtercard text="Rape Issues"/>
-                  <Filtercard text="Sexual Harrasment"/>
-                  <Filtercard text="Pending"/>
-                  <Filtercard text="Resolved"/>
-                  <Filtercard text="Cancelled"/>
-                  <Filtercard text="Yesterday"/>
-                  <Filtercard text="Last 1 week"/>
-                  <Filtercard text="Last 1 month"/>
+            <div className='reports-filter-modal-overlay' onClick={handleFilterClose}>
+              <div className='reports-filter-modal' role='dialog' aria-modal='true' onClick={e => e.stopPropagation()}>
+                <div className='reports-filter-modal-head'>
+                  <p>Apply Filter</p>
+                  <button type='button' className='reports-close-modal-btn' onClick={handleFilterClose} aria-label='Close filter modal'>×</button>
                 </div>
-                <button onClick={handleFilterClose}>Done</button>
+
+                <form className='reports-filter-modal-form' onSubmit={handleApplyFilters}>
+                  <label htmlFor='reports-filter-type'>Incident Type</label>
+                  <select
+                    id='reports-filter-type'
+                    name='type'
+                    value={filters.type}
+                    onChange={handleFilterChange}
+                  >
+                    <option value=''>All incident types</option>
+                    <option value='Sexual Harassment'>Sexual Harassment</option>
+                    <option value='Gender-based violence'>Gender-based violence</option>
+                    <option value='Rape Issues'>Rape Issues</option>
+                  </select>
+
+                  <label htmlFor='reports-filter-status'>Status</label>
+                  <select
+                    id='reports-filter-status'
+                    name='status'
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                  >
+                    <option value=''>All statuses</option>
+                    <option value='Pending'>Pending</option>
+                    <option value='In Progress'>In Progress</option>
+                    <option value='Resolved'>Resolved</option>
+                    <option value='Closed'>Closed</option>
+                  </select>
+
+                  <label htmlFor='reports-filter-date'>Date</label>
+                  <input
+                    id='reports-filter-date'
+                    name='date'
+                    type='date'
+                    value={filters.date}
+                    onChange={handleFilterChange}
+                  />
+
+                  <div className='reports-filter-modal-actions'>
+                    <button type='button' className='reports-ghost-btn' onClick={handleResetFilters}>Reset</button>
+                    <button type='button' className='reports-ghost-btn' onClick={handleFilterClose}>Cancel</button>
+                    <button type='submit' className='reports-apply-btn'>Apply Filter</button>
+                  </div>
+                </form>
               </div>
             </div>
           )}
 
           {isSortOpen && (
-            <div className='modal-overlay' onClick={handleSortClose}>
+            <div className='modal-overlay reports-modal-overlay' onClick={handleSortClose}>
               <div className='sort-card' onClick={e => e.stopPropagation()}>
                 <div className='sort-card-head'>
                   <p>Sort By</p>
@@ -280,21 +323,6 @@ const Reports = () => {
 
                 <button className='sort-apply-btn' onClick={handleSortApply}>Apply Sort</button>
               </div>
-            </div>
-          )}
-
-          {isPdfOpen && (
-            <div className='pdf-files'>
-              {tableContent.map((value, index) => (
-                <Pdf
-                  key={index}
-                  caseNo={value.id}
-                  type={value.type}
-                  width={value.width}
-                  status={value.status}
-                  onOpenDetails={() => handleOpenReportDetails(value)}
-                />
-              ))}
             </div>
           )}
 
@@ -347,105 +375,6 @@ function ReportList({ id, type, reportedBy, reportedEmail, status, date, width, 
       </td>
       <td>{formatDate(date)}</td>
     </tr>
-  )
-}
-
-function Filtercard({ text }) {
-  return (
-    <div className='option'>
-      <input type="checkbox"/>
-      <label>{text}</label>
-    </div>
-  )
-}
-
-function Pdf({ caseNo, type, status, width, onOpenDetails }) {
-  let background
-  let color
-
-  if (status === "Resolved")        { background = "#48C9B01A"; color = "#48C9B0" }
-  else if (status === "Pending")    { background = "#EAC4001A"; color = "#EAC400" }
-  else if (status === "In Progress"){ background = "#3DACF51A"; color = "#3DACF5" }
-  else if (status === "Closed")     { background = "#9999991A"; color = "#999999" }
-
-  function formatDate(date) {
-    const d     = new Date(date)
-    const day   = String(d.getDate()).padStart(2, "0")
-    const month = String(d.getMonth() + 1).padStart(2, "0")
-    const year  = String(d.getFullYear()).slice(-2)
-    return day + "-" + month + "-" + year
-  }
-
-  const [isDetailsOpen,       setIsDetailsOpen]       = useState(false)
-  const [isDownloadPopupOpen, setIsDownloadPopupOpen] = useState(false)
-  const [isArchivePopupOpen,  setIsArchivePopupOpen]  = useState(false)
-
-  function handleOpenDetails()        { setIsDetailsOpen(prev => !prev) }
-  function handleOpenDownloadModal()  { setIsDownloadPopupOpen(prev => !prev); setIsDetailsOpen(false) }
-  function handleCloseDownloadModal() { setIsDownloadPopupOpen(false) }
-  function handleOpenArchiveModal()   { setIsArchivePopupOpen(prev => !prev); setIsDetailsOpen(false) }
-  function handleCloseArchiveModal()  { setIsArchivePopupOpen(false) }
-
-  return (
-    <>
-      <div className='pdf-file'>
-        <div className='file-top'>
-          <GrDocumentPdf size={35}/>
-          <HiDotsVertical size={25} className='icon' onClick={handleOpenDetails}/>
-        </div>
-        <div className='file-middle'>
-          <p>Case No. {caseNo}</p>
-          <p>{type}<span>{formatDate(new Date())}</span></p>
-        </div>
-        <div className='file-bottom'>
-          <p style={{ background, color }}>{status}</p>
-          <div className='progress-bar'>
-            <div className='progress' style={{ width }}></div>
-          </div>
-        </div>
-
-        {isDetailsOpen && (
-          <div className='submenu-dropdown'>
-            <div className='options'>
-              <button onClick={onOpenDetails}>Details</button>
-              <button onClick={handleOpenDownloadModal}>Download pdf</button>
-              <button>Share</button>
-              <button onClick={handleOpenArchiveModal}>Archive</button>
-            </div>
-          </div>
-        )}
-
-        {isDownloadPopupOpen && (
-          <div className='modal-overlay'>
-            <div className='delete-popup'>
-              <div className='close-icon'><IoMdClose size={30} onClick={handleCloseDownloadModal}/></div>
-              <img src={warning} alt="warning"/>
-              <p>Download Report</p>
-              <p>This report would be downloaded in pdf format. Please note that this report should only be used for official purposes.</p>
-              <div className='buttons'>
-                <button type='button' onClick={handleCloseDownloadModal}>Cancel</button>
-                <button type='button'>Start Download</button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {isArchivePopupOpen && (
-          <div className='modal-overlay'>
-            <div className='delete-popup'>
-              <div className='close-icon'><IoMdClose size={30} onClick={handleCloseArchiveModal}/></div>
-              <img src={warning} alt="warning"/>
-              <p>Archive Report</p>
-              <p>You are about to archive this report. You can find all archived reports in your profile.</p>
-              <div className='buttons'>
-                <button type='button' onClick={handleCloseArchiveModal}>Cancel</button>
-                <button type='button'>Archive</button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </>
   )
 }
 
