@@ -1,3 +1,5 @@
+import CryptoJS from "crypto-js";
+
 const sanitizeBaseUrl = (rawValue) => {
   const value = String(rawValue ?? "").trim();
 
@@ -9,6 +11,43 @@ const sanitizeBaseUrl = (rawValue) => {
 };
 
 const BASE_URL = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
+const STORAGE_SECRET = import.meta.env.VITE_STORAGE_SECRET;
+
+const getStoredToken = () => {
+  if (typeof window === "undefined" || !STORAGE_SECRET) {
+    return "";
+  }
+
+  const encryptedToken = localStorage.getItem("authToken");
+  if (!encryptedToken) {
+    return "";
+  }
+
+  try {
+    const decrypted = CryptoJS.AES.decrypt(
+      encryptedToken,
+      STORAGE_SECRET,
+    ).toString(CryptoJS.enc.Utf8);
+    return JSON.parse(decrypted);
+  } catch {
+    return "";
+  }
+};
+
+const createHeaders = (includeAuth = false) => {
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  if (includeAuth) {
+    const token = getStoredToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
+  return headers;
+};
 
 const buildUrl = (uri) => {
   const normalizedUri = `/${String(uri || "").replace(/^\/+/, "")}`;
@@ -45,12 +84,12 @@ const getErrorMessage = (response, result) => {
 };
 
 export const api = {
-  post: async (uri, data) => {
+  post: async (uri, data, options = {}) => {
+    const { auth = false } = options;
+
     const response = await fetch(buildUrl(uri), {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createHeaders(auth),
       body: JSON.stringify(data),
     });
 
@@ -66,10 +105,48 @@ export const api = {
   get: async (uri) => {
     const response = await fetch(buildUrl(uri), {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: createHeaders(true),
     });
+
+    const result = await parseResponseBody(response);
+
+    if (!response.ok || result?.error) {
+      throw new Error(getErrorMessage(response, result));
+    }
+
+    return result || {};
+  },
+
+  put: async (uri, data, options = {}) => {
+    const { auth = false } = options;
+
+    const response = await fetch(buildUrl(uri), {
+      method: "PUT",
+      headers: createHeaders(auth),
+      body: JSON.stringify(data),
+    });
+
+    const result = await parseResponseBody(response);
+
+    if (!response.ok || result?.error) {
+      throw new Error(getErrorMessage(response, result));
+    }
+
+    return result || {};
+  },
+
+  delete: async (uri, options = {}) => {
+    const { auth = false } = options;
+
+    const response = await fetch(buildUrl(uri), {
+      method: "DELETE",
+      headers: createHeaders(auth),
+    });
+
+    // 204 No Content is a valid success response for DELETE
+    if (response.status === 204) {
+      return {};
+    }
 
     const result = await parseResponseBody(response);
 
