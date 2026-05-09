@@ -1,9 +1,24 @@
-const RAW_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
-const BASE_URL = RAW_BASE_URL.endsWith("/") ? RAW_BASE_URL : `${RAW_BASE_URL}/`;
+const sanitizeBaseUrl = (rawValue) => {
+  const value = String(rawValue ?? "").trim();
+
+  if (!value || value === "undefined" || value === "null") {
+    return "/";
+  }
+
+  return value;
+};
+
+const BASE_URL = sanitizeBaseUrl(import.meta.env.VITE_API_BASE_URL);
 
 const buildUrl = (uri) => {
-  const normalizedUri = uri.startsWith("/") ? uri.slice(1) : uri;
-  return `${BASE_URL}${normalizedUri}`;
+  const normalizedUri = `/${String(uri || "").replace(/^\/+/, "")}`;
+
+  if (BASE_URL === "/") {
+    return normalizedUri;
+  }
+
+  const normalizedBase = BASE_URL.replace(/\/+$/, "");
+  return `${normalizedBase}${normalizedUri}`;
 };
 
 const parseResponseBody = async (response) => {
@@ -67,5 +82,5 @@ export const api = {
 };
 
 export const AUTH_ENDPOINTS = {
-  LOGIN: "api/v1/auth/login",
+  LOGIN: "/api/v1/auth/login",
 };
