@@ -4,7 +4,7 @@ import Sidebar from './Sidebar';
 import Searchbar from './Searchbar';
 
 import success from '../assets/success.png'
-import warning from '../assets/warning.png'
+import warning from '../assets/Warning.png'
 
 import { GrDocumentPdf } from "react-icons/gr";
 import { CiStar, CiEdit } from "react-icons/ci";
