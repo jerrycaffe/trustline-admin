@@ -3,20 +3,21 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../css/Sidebar.css';
 import { FaRegFileLines, FaRegUser } from 'react-icons/fa6';
 import { RxDashboard } from 'react-icons/rx';
-import { BiPieChartAlt2, BiSupport, BiLogOut } from 'react-icons/bi';
+import { BiPieChartAlt2, BiLogOut } from 'react-icons/bi';
 import { RiStackLine } from 'react-icons/ri';
+import { PiChatsCircleLight } from 'react-icons/pi';
 import { FaHandHoldingHeart } from 'react-icons/fa';
 import { IoIosSettings } from 'react-icons/io';
-import TrustlineLogo from './TrustlineLogo';
+import logoMark from '../assets/logoimage.png';
 
 const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: RxDashboard },
   { label: 'Reports', path: '/reports', icon: FaRegFileLines },
   { label: 'Users', path: '/users', icon: FaRegUser },
+  { label: 'Chats', path: '/chats', icon: PiChatsCircleLight },
   { label: 'Resources', path: '/resources', icon: RiStackLine },
   { label: 'Analytics', path: '/analytics', icon: BiPieChartAlt2 },
-  { label: 'Zen', path: '/zen', icon: FaHandHoldingHeart, badge: 1 },
-  { label: 'Support', path: '/support', icon: BiSupport },
+  { label: 'Activities', path: '/activities', icon: FaHandHoldingHeart, badge: 1 },
   { label: 'Settings', path: '/settings', icon: IoIosSettings },
 ];
 
@@ -35,7 +36,7 @@ const Sidebar = () => {
     <aside className='sidebar'>
       <div className='sidebar-top'>
         <Link to='/dashboard' className='sidebar-logo'>
-          <TrustlineLogo className='sidebar-logo-icon' size={28} />
+          <img src={logoMark} alt='TrustLine logo' className='sidebar-logo-icon' />
           <span className='sidebar-logo-text'>Trustline</span>
         </Link>
 

@@ -11,11 +11,12 @@ import Users from './components/Users'
 import UserDetails from './components/UserDetails'
 import Resources from './components/Resources'
 import Analytics from './components/Analytics'
-import Zen from './components/Zen'
+import Activities from './components/Activities'
 import Support from './components/Support'
 import Settings from './components/Settings'
 import UserProfile from './components/UserProfile'
 import Notification from './components/Notification'
+import ChatsHistory from './components/ChatsHistory'
 
 
 const App = () => {
@@ -26,6 +27,8 @@ const App = () => {
         <Route path='/login' element={<Login />} />
         <Route path='/user-profile' element={<UserProfile />} />
         <Route path='/notification' element={<Notification />} />
+        <Route path='/chats' element={<Notification />} />
+        <Route path='/chats/:chatId' element={<ChatsHistory />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/reports' element={<Reports />} />
         <Route path='/reports/details' element={<ReportDetails />} />
@@ -34,7 +37,7 @@ const App = () => {
         <Route path='/users/details' element={<UserDetails />} />
         <Route path='/resources' element={<Resources />} />
         <Route path='/analytics' element={<Analytics />} />
-        <Route path='/zen' element={<Zen />} />
+        <Route path='/activities' element={<Activities />} />
         <Route path='/support' element={<Support />} />
         <Route path='/settings' element={<Settings />} />
         <Route path='*' element={<Navigate to='/login' replace />} />

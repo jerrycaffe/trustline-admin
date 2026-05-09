@@ -3,23 +3,22 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import '../css/Users.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
-
 import aina from '../assets/aina.png'
 import wade from '../assets/wade.png'
 import jenny from '../assets/jenny.png'
 import jane from '../assets/jane.png'
+import profilepic from '../assets/profilepic.png'
 
-import { FaLongArrowAltDown, FaLongArrowAltUp } from "react-icons/fa";
-import { HiDotsHorizontal } from "react-icons/hi";
+import { FaLongArrowAltDown, FaLongArrowAltUp, FaMale, FaFemale, FaUser } from "react-icons/fa";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
 import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 
 const SORT_FIELDS = [
   { value: 'name', label: 'Name' },
-  { value: 'type', label: 'Type' },
+  { value: 'gender', label: 'Gender' },
   { value: 'dateRegistered', label: 'Date Registered' },
-  { value: 'lastLogin', label: 'Last Login' },
+  { value: 'ongoingCases', label: 'Ongoing Cases' },
 ]
 
 const PAGE_SIZE_OPTIONS = [20, 10, 30, 50]
@@ -35,14 +34,14 @@ const Users = () => {
   const [pendingSortDir, setPendingSortDir] = useState('asc')
 
   const [filters, setFilters] = useState({
-    type: '',
+    gender: '',
     dateRegistered: '',
   })
 
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
 
-  const tableHead = ["Name","Type","Date Registered","Last Login","Ongoing Cases","Closed Cases", ""]
+  const tableHead = ["Name","Gender","Email","Phone Number","Date Registered","Ongoing Cases"]
 
   function handleFilterOpen() { setIsFilterOpen(true) }
   function handleFilterClose() { setIsFilterOpen(false) }
@@ -56,7 +55,7 @@ const Users = () => {
   }
   
   function handleResetFilters() {
-    setFilters({ type: '', dateRegistered: '' })
+    setFilters({ gender: '', dateRegistered: '' })
   }
   
   function handleApplyFilters(event) {
@@ -73,117 +72,97 @@ const Users = () => {
 
 const topTableContent = [
   {
-   image:jenny,
+  image:jenny,
+   gender:"female",
    name:"Jenny Wilson",
-   type:"Victim",
    email: "jennywilson@gmail.com",
    phoneNumber: "+234 811 345 2201",
    dateRegistered: "12th June, 2024",
-   lastLogin:"Today",
    ongoingCases:"0",
-   closedCases:"0"
   },
   {
-   image:wade,
+    image:wade,
+   gender:"male",
    name:"Wade Warren",
-   type:"Victim",
    email: "wadewarren@gmail.com",
    phoneNumber: "+234 803 445 2245",
    dateRegistered: "5th July, 2024",
-   lastLogin:"Today",
    ongoingCases:"0",
-   closedCases:"0"
   },
 ]
 
 const secondTableContent = [
   {
-   image:aina,
+  image:aina,
+   gender:"female",
    name:"Modupe Aina",
-   type:"Victim",
    email: "modupe077@gmail.com",
    phoneNumber: "+234 801 886 7528",
    dateRegistered: "12th June, 2024",
-   lastLogin:"Today",
    ongoingCases:"3",
-   closedCases:"8"
   },
   {
-   image:aina,
+    image:aina,
+   gender:"female",
    name:"Modupe Aina",
-   type:"Victim",
    email: "modupe077@gmail.com",
    phoneNumber: "+234 801 886 7528",
    dateRegistered: "12th June, 2024",
-   lastLogin:"Today",
    ongoingCases:"3",
-   closedCases:"8"
   },
   {
-   image:jane,
+    image:jane,
+   gender:"female",
    name:"Jane Doe",
-   type:"Witness",
    email: "janedoe@gmail.com",
    phoneNumber: "+234 808 100 9920",
    dateRegistered: "20th May, 2024",
-   lastLogin:"Yesterday",
    ongoingCases:"1",
-   closedCases:"2"
   },
   {
-   image:jane,
+    image:profilepic,
+   gender:"not-set",
    name:"Jane Doe",
-   type:"Witness",
    email: "janedoe@gmail.com",
    phoneNumber: "+234 808 100 9920",
    dateRegistered: "20th May, 2024",
-   lastLogin:"Yesterday",
    ongoingCases:"1",
-   closedCases:"2"
   },
   {
-   image:jenny,
+    image:jenny,
+   gender:"female",
    name:"Jenny Wilson",
-   type:"Victim",
    email: "jennywilson@gmail.com",
    phoneNumber: "+234 811 345 2201",
    dateRegistered: "12th June, 2024",
-   lastLogin:"Today",
    ongoingCases:"0",
-   closedCases:"0"
   },
   {
-   image: jenny,
+    image:profilepic,
+   gender:"not-set",
    name:"Jenny Wilson",
-   type:"Victim",
    email: "jennywilson@gmail.com",
    phoneNumber: "+234 811 345 2201",
    dateRegistered: "12th June, 2024",
-   lastLogin:"Today",
    ongoingCases:"0",
-   closedCases:"0"
   },
   {
-   image:wade,
+    image:wade,
+   gender:"male",
    name:"Wade Warren",
-   type:"Witness",
    email: "wadewarren@gmail.com",
    phoneNumber: "+234 803 445 2245",
    dateRegistered: "5th July, 2024",
-   lastLogin:"Yesterday",
    ongoingCases:"4",
-   closedCases:"0"
   },
   {
-   image:wade,
+    image:wade,
+   gender:"male",
    name:"Wade Warren",
-   type:"Witness",
    email: "wadewarren@gmail.com",
    phoneNumber: "+234 803 445 2245",
    dateRegistered: "5th July, 2024",
-   lastLogin:"Yesterday",
    ongoingCases:"4",
-   closedCases:"0"
   },
 ]
 
@@ -231,13 +210,12 @@ function handleOpenUserDetails(user) {
                 <List 
                   key={index}
                   user={value}
-                  image={value.image}
+                  gender={value.gender}
                   name={value.name}
-                  type={value.type}
+                  email={value.email}
+                  phoneNumber={value.phoneNumber}
                   dateRegistered={value.dateRegistered}
-                  lastLogin={value.lastLogin}
                   ongoingCases={value.ongoingCases}
-                  closedCases={value.closedCases}
                   onOpenDetails={handleOpenUserDetails}
                 /> 
                 ))}
@@ -308,17 +286,17 @@ function handleOpenUserDetails(user) {
                 </div>
 
                 <form onSubmit={handleApplyFilters} className='users-filter-modal-form'>
-                  <label htmlFor='users-filter-type'>Type</label>
+                  <label htmlFor='users-filter-gender'>Gender</label>
                   <select
-                    id='users-filter-type'
-                    name='type'
-                    value={filters.type}
+                    id='users-filter-gender'
+                    name='gender'
+                    value={filters.gender}
                     onChange={handleFilterChange}
                   >
-                    <option value=''>All types</option>
-                    <option value='Victim'>Victim</option>
-                    <option value='Witness'>Witness</option>
-                    <option value='Accused'>Accused</option>
+                    <option value=''>All genders</option>
+                    <option value='male'>Male</option>
+                    <option value='female'>Female</option>
+                    <option value='not-set'>Not Set</option>
                   </select>
 
                   <label htmlFor='users-filter-date'>Date Registered</label>
@@ -396,37 +374,32 @@ function handleOpenUserDetails(user) {
   )
 }
 
-function  List({ user, image, name, type, dateRegistered, lastLogin, ongoingCases, closedCases, onOpenDetails }){
-    const[isDetailsOpen, setIsDetailsOpen]= useState(false)
-    
-    function handleOpenDetails(){
-      setIsDetailsOpen(prev => !prev)
-  }
-  
-  // function handleCloseDetails(){
-  //   setIsDetailsOpen(false)
-  // }
-  
+const AVATAR_CONFIG = {
+  male:    { Icon: FaMale,   bg: '#dbeafe', color: '#3b82f6' },
+  female:  { Icon: FaFemale, bg: '#fce7f3', color: '#ec4899' },
+  'not-set': { Icon: FaUser, bg: '#f1f5f9', color: '#94a3b8' },
+  unknown: { Icon: FaUser,   bg: '#f1f5f9', color: '#94a3b8' },
+}
+
+function GenderAvatar({ gender }) {
+  const { Icon, bg, color } = AVATAR_CONFIG[gender] || AVATAR_CONFIG.unknown
+  return (
+    <span className='user-avatar' style={{ background: bg }}>
+      <Icon size={16} color={color} />
+    </span>
+  )
+}
+
+function  List({ user, gender, name, email, phoneNumber, dateRegistered, ongoingCases, onOpenDetails }){
   return(
     <>
   <tr onClick={() => onOpenDetails(user)}>
-    <td className='name'><img src={image} />{name}</td>
-    <td>{type}</td>
+    <td className='name'><GenderAvatar gender={gender} />{name}</td>
+    <td>{gender === 'male' ? 'Male' : gender === 'female' ? 'Female' : 'Not Set'}</td>
+    <td>{email}</td>
+    <td>{phoneNumber}</td>
     <td>{dateRegistered}</td>
-    <td>{lastLogin}</td>
     <td>{ongoingCases}</td>
-    <td>{closedCases}</td>
-    <td className='action-cell'>
-      <button className='details' onClick={(event) => { event.stopPropagation(); handleOpenDetails(); }}><HiDotsHorizontal size={20}/></button>
-      {isDetailsOpen &&
-        <div className='submenu-dropdown'>
-          <div className='options'>
-            <button onClick={(event) => { event.stopPropagation(); onOpenDetails(user); }}>Details</button>
-            <button>Share</button>
-            <button>Deactivate</button>
-          </div>
-        </div>}
-    </td>
   </tr>
   </>)
 }

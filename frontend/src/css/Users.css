@@ -192,13 +192,12 @@
     white-space: nowrap;
 }
 
-.users table th:nth-child(1) { width: 30%; }
+.users table th:nth-child(1) { width: 24%; }
 .users table th:nth-child(2) { width: 12%; }
-.users table th:nth-child(3) { width: 14%; }
-.users table th:nth-child(4) { width: 12%; }
-.users table th:nth-child(5) { width: 12%; }
-.users table th:nth-child(6) { width: 12%; }
-.users table th:nth-child(7) { width: 8%; }
+.users table th:nth-child(3) { width: 22%; }
+.users table th:nth-child(4) { width: 16%; }
+.users table th:nth-child(5) { width: 16%; }
+.users table th:nth-child(6) { width: 10%; }
 
 .users table tbody tr + tr td {
     border-top: 1px solid #ececf3;
@@ -210,6 +209,7 @@
 
 .users table tbody tr:hover {
     background-color: #f8f9fd;
+  cursor: pointer;
 }
 
 .users table td {
@@ -233,75 +233,14 @@
     align-items: center;
 }
 
-.users .name img {
-    width: 30px;
-    height: 30px;
+.users .user-avatar {
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     flex-shrink: 0;
-}
-
-.users .action-cell {
-    position: relative;
-    overflow: visible;
-}
-
-.users .details {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    border-radius: 999px;
-    width: 32px;
-    height: 32px;
-    border: none;
-    background-color: transparent;
-    color: #55646b;
-    transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.users .details:hover {
-    background-color: #eceffd;
-    color: #6f67ee;
-}
-
-.users .submenu-dropdown {
-    width: 150px;
-    position: absolute;
-    right: 18px;
-    top: 44px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    z-index: 20;
-    padding: 10px;
-}
-
-.users .submenu-dropdown .options {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-}
-
-.users .submenu-dropdown button {
-    background: none;
-    border: 0.5px solid #e0e0e0;
-    padding: 6px 10px;
-    text-align: center;
-    cursor: pointer;
-    font-size: 13px;
-    width: 100%;
-    border-radius: 8px;
-    color: #21343b;
-}
-
-.users .submenu-dropdown button:hover {
-    background: #837aef;
-    color: #fff;
-    border: none;
 }
 
 /* ---- Users Pagination ---- */

@@ -44,6 +44,10 @@
 }
 
 .settings .general,
+.settings .incident-types,
+.settings .admin-users,
+.settings .activities,
+.settings .role-permissions-tab,
 .settings .reporting,
 .settings .notification,
 .settings .data-management,
@@ -110,6 +114,696 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.incident-types-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.incident-types-head p {
+    margin: 0;
+    font-size: 22px;
+}
+
+.incident-types-head span {
+    font-size: 14px;
+    color: #667085;
+}
+
+.incident-type-form {
+    margin-top: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.incident-type-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.incident-type-form label span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.incident-type-form input,
+.incident-type-form textarea {
+    border: 1px solid #d0d9e5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+}
+
+.incident-type-form textarea {
+    resize: vertical;
+    min-height: 74px;
+}
+
+.incident-type-form input:focus,
+.incident-type-form textarea:focus {
+    border-color: #837AEF;
+    box-shadow: 0 0 0 3px rgba(131, 122, 239, 0.18);
+}
+
+.incident-type-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.incident-primary-btn,
+.incident-secondary-btn,
+.incident-edit-btn,
+.incident-delete-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.incident-primary-btn {
+    background: #837AEF;
+    color: #fff;
+}
+
+.incident-primary-btn:hover {
+    background: #6f66dc;
+}
+
+.incident-secondary-btn {
+    background: #eef2f7;
+    color: #475467;
+}
+
+.incident-secondary-btn:hover {
+    background: #e1e8f0;
+}
+
+.incident-types-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.incident-type-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.incident-type-item-content {
+    min-width: 0;
+}
+
+.incident-type-item-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.incident-type-item-content p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: #475467;
+}
+
+.incident-type-item-content .incident-type-steps {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+}
+
+.incident-type-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.incident-edit-btn {
+    background: #eef2ff;
+    color: #3f51b5;
+}
+
+.incident-edit-btn:hover {
+    background: #dfe5ff;
+}
+
+.incident-delete-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.incident-delete-btn:hover {
+    background: #fecaca;
+}
+
+.admin-users-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.admin-users-head p {
+    margin: 0;
+    font-size: 22px;
+}
+
+.admin-users-head span {
+    font-size: 14px;
+    color: #667085;
+}
+
+.invite-admin,
+.admin-list,
+.roles-permissions {
+    margin-top: 18px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 14px;
+    background: #ffffff;
+}
+
+.invite-admin h4,
+.admin-list h4,
+.roles-permissions h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.invite-admin-form {
+    margin-top: 12px;
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) 220px auto;
+    gap: 10px;
+    align-items: end;
+}
+
+.invite-admin-form label,
+.role-form label,
+.permission-assign-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.invite-admin-form label span,
+.role-form label span,
+.permission-assign-form label span,
+.permission-box p {
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+    margin: 0;
+}
+
+.invite-admin-form input,
+.invite-admin-form select,
+.role-form input,
+.permission-assign-form select,
+.admin-role-select {
+    border: 1px solid #d0d9e5;
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-size: 13px;
+    color: #0f172a;
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+}
+
+.invite-admin-form input:focus,
+.invite-admin-form select:focus,
+.role-form input:focus,
+.permission-assign-form select:focus,
+.admin-role-select:focus {
+    border-color: #837AEF;
+    box-shadow: 0 0 0 3px rgba(131, 122, 239, 0.18);
+}
+
+.admin-primary-btn,
+.admin-secondary-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.admin-primary-btn {
+    background: #837AEF;
+    color: #fff;
+}
+
+.admin-primary-btn:hover {
+    background: #6f66dc;
+}
+
+.admin-primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.admin-secondary-btn {
+    background: #eef2f7;
+    color: #475467;
+}
+
+.admin-secondary-btn:hover {
+    background: #e1e8f0;
+}
+
+.admin-list-table-wrap {
+    margin-top: 12px;
+    overflow-x: auto;
+}
+
+.admin-list-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 900px;
+}
+
+.admin-list-table th,
+.admin-list-table td {
+    text-align: left;
+    border-bottom: 1px solid #eceff4;
+    padding: 10px 8px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.admin-list-table th {
+    font-size: 12px;
+    font-weight: 600;
+    color: #475467;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.admin-name-cell p {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.admin-name-cell span {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.admin-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.admin-status.active {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.admin-status.invited {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.activities-head {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.activities-head p {
+    margin: 0;
+    font-size: 22px;
+}
+
+.activities-head span {
+    font-size: 14px;
+    color: #667085;
+}
+
+.activity-form {
+    margin-top: 18px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.activity-form label span {
+    font-size: 13px;
+    font-weight: 500;
+    color: #334155;
+}
+
+.activity-form input,
+.activity-form textarea {
+    border: 1px solid #d0d9e5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #fff;
+    outline: none;
+    font-family: inherit;
+}
+
+.activity-form textarea {
+    resize: vertical;
+    min-height: 74px;
+}
+
+.activity-form input:focus,
+.activity-form textarea:focus {
+    border-color: #837AEF;
+    box-shadow: 0 0 0 3px rgba(131, 122, 239, 0.18);
+}
+
+.activity-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.activities-list {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.activity-item {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.activity-item-content {
+    min-width: 0;
+}
+
+.activity-item-content h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.activity-item-content p {
+    margin: 5px 0 0;
+    font-size: 13px;
+    font-weight: 400;
+    color: #475467;
+}
+
+.activity-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.roles-permissions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.role-form,
+.permission-assign-form {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.permission-assign-top {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.permission-role-id {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    color: #3f51b5;
+    background: #eef2ff;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 6px 10px;
+}
+
+.permission-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.manage-permissions-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: #fafafa;
+}
+
+.manage-permissions-section h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.permission-create-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.permission-create-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 180px;
+    font-size: 13px;
+    color: #334155;
+}
+
+.permission-create-form input {
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.permissions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.permission-list-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef2ff;
+    color: #3f51b5;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.permission-delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.permission-delete-btn:hover {
+    color: #ef4444;
+}
+
+.permission-add-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.permission-add-row select {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+.permission-assigned-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.permission-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #eef2ff;
+    color: #3f51b5;
+    border: 1px solid #c7d2fe;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.permission-chip button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6b7280;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    line-height: 1;
+}
+
+.permission-chip button:hover {
+    color: #ef4444;
+}
+
+.role-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.role-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.role-item {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+}
+
+.role-item-main h5 {
+    margin: 0;
+    font-size: 15px;
+    color: #111827;
+}
+
+.role-permissions-chips {
+    margin-top: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.role-permissions-chips span {
+    background: #eef2ff;
+    color: #3f51b5;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.role-permissions-chips .role-no-permission {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.role-item-actions {
+    display: flex;
+    gap: 8px;
+}
+
+@media (max-width: 1024px) {
+    .invite-admin-form {
+        grid-template-columns: 1fr;
+    }
+
+    .role-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
 }
 
 .reporting .add-reports{
