@@ -1,7 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import toast from 'react-hot-toast'
 import '../css/Settings.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
+import { api } from '../services/api'
 
 import { IoMdAdd, IoMdClose  } from "react-icons/io";
 import { FiEdit2 } from 'react-icons/fi'
@@ -58,17 +60,76 @@ const initialActivities = [
   },
 ]
 
+const extractIncidentTypeItems = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  return Array.isArray(response?.data) ? response.data : []
+}
+
+const isIncidentTypeObject = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+
+  return (
+    'id' in value ||
+    'name' in value ||
+    'description' in value ||
+    'steps' in value ||
+    'createdBy' in value
+  )
+}
+
+const extractCreatedIncidentType = (response) => {
+  if (isIncidentTypeObject(response)) {
+    return response
+  }
+
+  const candidates = [
+    response?.data,
+    response?.result,
+    response?.item,
+    response?.incidentType,
+    response?.data?.result,
+    response?.data?.item,
+    response?.data?.incidentType,
+  ]
+
+  return candidates.find(isIncidentTypeObject) || null
+}
+
+const UUID_V4_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+
+const isUuid = (value) => UUID_V4_REGEX.test(String(value || '').trim())
+
+const normalizeIncidentType = (type, index) => {
+  if (!type || typeof type !== 'object') {
+    return null
+  }
+
+  return {
+    id: type.id ?? type._id ?? '',
+    name: type.name ?? 'Unnamed incident type',
+    description: type.description ?? '',
+    createdBy: type.createdBy ?? '',
+    steps: Number(type.steps ?? 0) || 0,
+  }
+}
+
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('Incident Types')
-  const [incidentTypes, setIncidentTypes] = useState([
-    { id: 1, name: 'Gender-based Violence', description: 'For violence crimes against females', steps: 0 },
-    { id: 2, name: 'Rape Issue', description: 'For reporting rape crimes', steps: 0 },
-    { id: 3, name: 'Sexual Harassment', description: 'For harassment crimes', steps: 0 },
-  ])
+  const [incidentTypes, setIncidentTypes] = useState([])
+  const [isLoadingIncidentTypes, setIsLoadingIncidentTypes] = useState(true)
   const [typeName, setTypeName] = useState('')
   const [typeDescription, setTypeDescription] = useState('')
   const [typeSteps, setTypeSteps] = useState(0)
   const [editingTypeId, setEditingTypeId] = useState(null)
+  const [isCreatingIncidentType, setIsCreatingIncidentType] = useState(false)
+  const [isUpdatingIncidentType, setIsUpdatingIncidentType] = useState(false)
+  const [isDeletingIncidentTypeId, setIsDeletingIncidentTypeId] = useState(null)
   const [roles, setRoles] = useState(initialRoles)
   const [adminUsers, setAdminUsers] = useState(initialAdminUsers)
   const [inviteEmail, setInviteEmail] = useState('')
@@ -87,6 +148,60 @@ const Settings = () => {
 
   const availableRoleNames = roles.map((role) => role.name)
 
+  useEffect(() => {
+    let isActive = true
+
+    const loadIncidentTypes = async () => {
+      setIsLoadingIncidentTypes(true)
+
+      try {
+        const response = await api.get('/api/v1/incident-types')
+        const items = extractIncidentTypeItems(response)
+          .map(normalizeIncidentType)
+          .filter(Boolean)
+
+        if (!isActive) return
+
+        setIncidentTypes(items)
+      } catch (error) {
+        if (!isActive) return
+
+        setIncidentTypes([])
+        toast.error(error.message || 'Unable to load incident types.')
+      } finally {
+        if (isActive) {
+          setIsLoadingIncidentTypes(false)
+        }
+      }
+    }
+
+    loadIncidentTypes()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  const toastLoading = (message) => {
+    return toast.loading(message)
+  }
+
+  const toastSuccess = (message, toastId = null) => {
+    if (toastId) {
+      toast.success(message, { id: toastId })
+    } else {
+      toast.success(message)
+    }
+  }
+
+  const toastError = (message, toastId = null) => {
+    if (toastId) {
+      toast.error(message, { id: toastId })
+    } else {
+      toast.error(message)
+    }
+  }
+
   const clearIncidentTypeForm = () => {
     setTypeName('')
     setTypeDescription('')
@@ -94,7 +209,7 @@ const Settings = () => {
     setEditingTypeId(null)
   }
 
-  const handleSaveIncidentType = (event) => {
+  const handleSaveIncidentType = async (event) => {
     event.preventDefault()
 
     const name = typeName.trim()
@@ -103,18 +218,77 @@ const Settings = () => {
     if (!name || !description) return
 
     if (editingTypeId) {
-      setIncidentTypes((prev) =>
-        prev.map((type) =>
-          type.id === editingTypeId ? { ...type, name, description, steps: normalizedSteps } : type
+      if (!isUuid(editingTypeId)) {
+        toastError('Invalid incident type id. Please refresh and try again.')
+        return
+      }
+
+      setIsUpdatingIncidentType(true)
+
+      try {
+        const response = await api.put(
+          `/api/v1/incident-types/${editingTypeId}`,
+          {
+            name,
+            description,
+            steps: normalizedSteps,
+          },
+          { auth: true },
         )
-      )
-      clearIncidentTypeForm()
+
+        const updatedPayload = extractCreatedIncidentType(response) || {
+          id: editingTypeId,
+          name,
+          description,
+          steps: normalizedSteps,
+        }
+
+        const updatedType = normalizeIncidentType(updatedPayload, incidentTypes.length)
+        if (updatedType) {
+          setIncidentTypes((prev) =>
+            prev.map((type) => (type.id === editingTypeId ? updatedType : type)),
+          )
+        }
+        clearIncidentTypeForm()
+        toastSuccess('Incident type updated successfully! 🎉')
+      } catch (error) {
+        toastError(error.message || 'Unable to update incident type.')
+      } finally {
+        setIsUpdatingIncidentType(false)
+      }
       return
     }
 
-    const nextId = incidentTypes.length > 0 ? Math.max(...incidentTypes.map((t) => t.id)) + 1 : 1
-    setIncidentTypes((prev) => [...prev, { id: nextId, name, description, steps: normalizedSteps }])
-    clearIncidentTypeForm()
+    setIsCreatingIncidentType(true)
+
+    try {
+      const response = await api.post(
+        '/api/v1/incident-types',
+        {
+          name,
+          description,
+          steps: normalizedSteps,
+        },
+        { auth: true },
+      )
+
+      const createdPayload = extractCreatedIncidentType(response) || {
+        name,
+        description,
+        steps: normalizedSteps,
+      }
+
+      const createdType = normalizeIncidentType(createdPayload, incidentTypes.length)
+      if (createdType) {
+        setIncidentTypes((prev) => [createdType, ...prev])
+      }
+      clearIncidentTypeForm()
+      toastSuccess('Incident type created successfully! ✨')
+    } catch (error) {
+      toastError(error.message || 'Unable to create incident type.')
+    } finally {
+      setIsCreatingIncidentType(false)
+    }
   }
 
   const handleEditIncidentType = (type) => {
@@ -124,10 +298,29 @@ const Settings = () => {
     setTypeSteps(type.steps ?? 0)
   }
 
-  const handleDeleteIncidentType = (typeId) => {
-    setIncidentTypes((prev) => prev.filter((type) => type.id !== typeId))
-    if (editingTypeId === typeId) {
-      clearIncidentTypeForm()
+  const handleDeleteIncidentType = async (typeId) => {
+    if (!typeId || typeof typeId !== 'string' || !typeId.includes('-')) {
+      toastError('Invalid incident type ID. Cannot delete.')
+      return
+    }
+
+    setIsDeletingIncidentTypeId(typeId)
+
+    try {
+      await api.delete(
+        `/api/v1/incident-types/${typeId}`,
+        { auth: true },
+      )
+
+      setIncidentTypes((prev) => prev.filter((type) => type.id !== typeId))
+      if (editingTypeId === typeId) {
+        clearIncidentTypeForm()
+      }
+      toastSuccess('Incident type deleted successfully! 👋')
+    } catch (error) {
+      toastError(error.message || 'Unable to delete incident type.')
+    } finally {
+      setIsDeletingIncidentTypeId(null)
     }
   }
 
@@ -394,6 +587,8 @@ const Settings = () => {
               <span>Add, edit, list, and remove incident types available on the platform.</span>
             </div>
 
+
+
             <form className='incident-type-form' onSubmit={handleSaveIncidentType}>
               <label>
                 <span>Incident Type Name</span>
@@ -434,30 +629,58 @@ const Settings = () => {
                     Cancel
                   </button>
                 ) : null}
-                <button type='submit' className='incident-primary-btn'>
-                  {editingTypeId ? 'Update Type' : (<><IoMdAdd /> Add Type</>)}
+                <button
+                  type='submit'
+                  className='incident-primary-btn'
+                  disabled={isCreatingIncidentType || isUpdatingIncidentType}
+                >
+                  {editingTypeId
+                    ? (isUpdatingIncidentType ? 'Updating...' : 'Update Type')
+                    : (isCreatingIncidentType ? 'Creating...' : <><IoMdAdd /> Add Type</>)}
                 </button>
               </div>
             </form>
 
             <div className='incident-types-list'>
-              {incidentTypes.map((type) => (
-                <article key={type.id} className='incident-type-item'>
+              {isLoadingIncidentTypes ? (
+                <div className='incident-types-list-state'>
+                  <div className='incident-types-loader' role='status' aria-live='polite'>
+                    <span className='incident-types-loader-label'>Loading incident types</span>
+                    <span className='incident-types-loader-dots' aria-hidden='true'>
+                      <span className='dot' />
+                      <span className='dot' />
+                      <span className='dot' />
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              {!isLoadingIncidentTypes && incidentTypes.length === 0 ? (
+                <div className='incident-types-empty-box'>
+                  <div className='incident-types-empty-illustration' aria-hidden='true' />
+                  <p>No incident types found.</p>
+                  <span>When incident types are available from the API, they will appear here.</span>
+                </div>
+              ) : null}
+
+              {!isLoadingIncidentTypes && incidentTypes.length > 0 ? incidentTypes.map((type, index) => (
+                <article key={type.id || `incident-type-${index}`} className='incident-type-item'>
                   <div className='incident-type-item-content'>
                     <h4>{type.name}</h4>
                     <p>{type.description}</p>
+                    {type.createdBy ? <p className='incident-type-created-by'>Created by: {type.createdBy}</p> : null}
                     <p className='incident-type-steps'>Steps: {type.steps}</p>
                   </div>
                   <div className='incident-type-item-actions'>
-                    <button type='button' className='incident-edit-btn' onClick={() => handleEditIncidentType(type)}>
+                    <button type='button' className='incident-edit-btn' onClick={() => handleEditIncidentType(type)} disabled={isDeletingIncidentTypeId === type.id}>
                       <FiEdit2 size={14} /> Edit
                     </button>
-                    <button type='button' className='incident-delete-btn' onClick={() => handleDeleteIncidentType(type.id)}>
-                      <RiDeleteBin6Line size={14} /> Delete
+                    <button type='button' className='incident-delete-btn' onClick={() => handleDeleteIncidentType(type.id)} disabled={isDeletingIncidentTypeId === type.id}>
+                      <RiDeleteBin6Line size={14} /> {isDeletingIncidentTypeId === type.id ? 'Deleting...' : 'Delete'}
                     </button>
                   </div>
                 </article>
-              ))}
+              )) : null}
             </div>
           </div>
         )}
