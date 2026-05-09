@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../css/Sidebar.css';
 import { FaRegFileLines, FaRegUser } from 'react-icons/fa6';
@@ -7,7 +7,7 @@ import { BiPieChartAlt2, BiLogOut } from 'react-icons/bi';
 import { RiStackLine } from 'react-icons/ri';
 import { PiChatsCircleLight } from 'react-icons/pi';
 import { FaHandHoldingHeart } from 'react-icons/fa';
-import { IoIosSettings } from 'react-icons/io';
+import { IoIosSettings, IoMdClose } from 'react-icons/io';
 import logoMark from '../assets/logoimage.png';
 
 const navItems = [
@@ -24,21 +24,67 @@ const navItems = [
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(() => {
+    const saved = localStorage.getItem('sidebarOpen');
+    return saved === null ? true : saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarOpen', String(isOpen));
+  }, [isOpen]);
+
+  useEffect(() => {
+    const handleSidebarSetOpen = (event) => {
+      setIsOpen(Boolean(event.detail));
+    };
+
+    window.addEventListener('sidebar-set-open', handleSidebarSetOpen);
+
+    return () => {
+      window.removeEventListener('sidebar-set-open', handleSidebarSetOpen);
+    };
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('authUser');
-    localStorage.removeItem('activeSidebar');
+    localStorage.removeItem('sidebarOpen');
     navigate('/login', { replace: true });
   };
+
+  if (!isOpen) {
+    return (
+      <button
+        type='button'
+        className='sidebar-reopen-btn'
+        onClick={() => setIsOpen(true)}
+        aria-label='Open navigation menu'
+      >
+        <span />
+        <span />
+        <span />
+      </button>
+    );
+  }
 
   return (
     <aside className='sidebar'>
       <div className='sidebar-top'>
-        <Link to='/dashboard' className='sidebar-logo'>
-          <img src={logoMark} alt='TrustLine logo' className='sidebar-logo-icon' />
-          <span className='sidebar-logo-text'>Trustline</span>
-        </Link>
+        <div className='sidebar-top-row'>
+          <Link to='/dashboard' className='sidebar-logo'>
+            <img src={logoMark} alt='TrustLine logo' className='sidebar-logo-icon' />
+            <span className='sidebar-logo-text'>Trustline</span>
+          </Link>
+
+          <button
+            type='button'
+            className='sidebar-close-btn'
+            onClick={() => setIsOpen(false)}
+            aria-label='Close navigation menu'
+          >
+            <IoMdClose size={20} />
+          </button>
+        </div>
 
         <nav className='sidebar-nav'>
           {navItems.map((item) => {

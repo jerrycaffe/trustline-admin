@@ -2,11 +2,24 @@ import profilePic from '../assets/profilepic.png';
 import '../css/Searchbar.css';
 import { CiSearch } from 'react-icons/ci';
 import { IoMdNotificationsOutline } from 'react-icons/io';
+import { IoMdMenu } from 'react-icons/io';
 import { Link } from 'react-router-dom';
 
 const Searchbar = () => {
+  const handleOpenSidebar = () => {
+    window.dispatchEvent(new CustomEvent('sidebar-set-open', { detail: true }));
+  };
+
   return (
     <div className='searchbar'>
+      <button
+        type='button'
+        className='searchbar-menu-button'
+        onClick={handleOpenSidebar}
+        aria-label='Open navigation menu'
+      >
+        <IoMdMenu size={22} />
+      </button>
       <div className='search'>
         <input type='text' placeholder='Search' />
         <span className='search-icon'>

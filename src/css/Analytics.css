@@ -111,6 +111,12 @@
   padding: 14px 16px 10px;
 }
 
+.analytics .second-section .left,
+.analytics .third-section .left,
+.analytics .right {
+  min-width: 0;
+}
+
 .analytics .second-section .left .left-header,
 .third-section .left .left-header {
   display: flex;
@@ -249,5 +255,63 @@
   .third-section .level p,
   .third-section .level p span {
     font-size: 14px;
+  }
+}
+
+@media (max-width: 900px) {
+  .analytics {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    padding: 20px 16px 32px;
+  }
+
+  .analytics .first-section .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .analytics .second-section,
+  .analytics .third-section {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics .second-section .left .monthly,
+  .analytics .second-section .left .weekly,
+  .analytics .right .bar-chart .chart {
+    height: 220px;
+  }
+}
+
+@media (max-width: 640px) {
+  .analytics .first-section .cards {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics .first-section .card img {
+    width: 60px;
+    height: 34px;
+  }
+
+  .analytics .second-section .left,
+  .analytics .right,
+  .third-section .left {
+    padding: 12px 14px;
+  }
+
+  .analytics .second-section .left .left-header,
+  .third-section .left .left-header,
+  .analytics .right .bar-chart .right-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics .second-section .left .left-header select,
+  .third-section .left .left-header select,
+  .analytics .right .bar-chart .right-header select {
+    width: 100%;
   }
 }

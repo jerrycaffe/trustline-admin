@@ -205,6 +205,11 @@
     padding: 0 56px 56px;
 }
 
+.reports .reports-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
 .reports .reports-body .reports-table-shell{
     width: min(100%, 1120px);
         background: rgba(255, 255, 255, 0.82);
@@ -217,6 +222,7 @@
 
 .reports .reports-body table{
     width: 100%;
+    min-width: 980px;
   border-collapse: separate;
   border-spacing: 0;
     background-color: #fff;
@@ -344,6 +350,78 @@
         .reports .reports-body .reports-table-shell{
                 width: 100%;
         }
+}
+
+@media (max-width: 900px) {
+    .reports-container .reports{
+        position: static;
+        top: auto;
+        left: auto;
+        right: auto;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .reports .reports-head,
+    .reports .reports-body {
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .reports .reports-head{
+        flex-direction: column;
+        align-items: flex-start;
+        margin-top: 16px;
+        gap: 12px;
+    }
+
+    .reports .reports-head .head-right{
+        width: 100%;
+        justify-content: flex-end;
+        padding: 0;
+    }
+
+    .reports .reports-body .reports-table-shell{
+        width: 100%;
+    }
+
+    .reports .reports-body table{
+        min-width: 900px;
+    }
+
+    .reports .reports-pagination{
+        padding: 0 16px 24px;
+    }
+}
+
+@media (max-width: 640px) {
+    .reports .reports-head p{
+        font-size: 20px;
+    }
+
+    .reports .reports-head .head-right{
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .reports .reports-pagination{
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .reports .reports-pagination .pagination-left,
+    .reports .reports-pagination .pagination-controls{
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .reports .filter-card,
+    .reports .sort-card{
+        width: min(100vw - 32px, 360px);
+        left: 0;
+        top: 0;
+    }
 }
 
 .reports .reports-modal-overlay{
