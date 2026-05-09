@@ -169,8 +169,14 @@
     overflow: hidden;
 }
 
+  .users .users-body {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
 .users table {
     width: 100%;
+  min-width: 920px;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
@@ -495,6 +501,75 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+}
+
+@media (max-width: 900px) {
+  .users {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+    padding: 20px 16px 32px;
+  }
+
+  .users .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .users .header .head-right {
+    width: 100%;
+    justify-content: flex-end;
+    padding: 0;
+  }
+
+  .users .new-users,
+  .users .every-user,
+  .users .users-table-shell,
+  .users .users-pagination {
+    width: 100%;
+  }
+
+  .users .head,
+  .users .header,
+  .users .users-pagination {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .users table {
+    min-width: 860px;
+  }
+
+  .users .sort-card {
+    width: min(100vw - 32px, 360px);
+  }
+}
+
+@media (max-width: 640px) {
+  .users .header .buttons {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .users .head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .users .users-pagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pagination-left,
+  .pagination-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
 }
 
 .sort-card-head {

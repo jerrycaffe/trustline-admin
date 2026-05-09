@@ -25,6 +25,13 @@
   min-height: 0;
 }
 
+.sidebar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 /* Logo */
 .sidebar-logo {
   display: flex;
@@ -48,6 +55,55 @@
   font-size: 1.25rem;
   color: #837aef;
   line-height: 1;
+}
+
+.sidebar-close-btn,
+.sidebar-reopen-btn {
+  border: 1px solid #ececf3;
+  background: #fff;
+  color: #001616;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease, border-color 0.18s ease;
+}
+
+.sidebar-close-btn {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sidebar-close-btn:hover,
+.sidebar-reopen-btn:hover {
+  background: #f5f4ff;
+  border-color: #d9d2ff;
+  color: #837aef;
+}
+
+.sidebar-reopen-btn {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 12;
+  box-shadow: 0 8px 20px rgba(20, 20, 43, 0.12);
+}
+
+.sidebar-reopen-btn span {
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+  display: block;
 }
 
 /* Nav */
@@ -155,13 +211,41 @@
 /* Responsive */
 @media (max-width: 900px) {
   .sidebar {
-    min-width: 220px;
-    max-width: 240px;
-    padding: 1.25rem 0.6rem 1rem;
+    position: relative;
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #d9d9d9;
+    padding: 1rem 0.75rem;
   }
+
+  .sidebar-top-row {
+    align-items: flex-start;
+  }
+
+  .sidebar-top {
+    gap: 0.9rem;
+  }
+
+  .sidebar-nav {
+    max-height: none;
+    padding-right: 0;
+  }
+
   .sidebar-link {
-    height: 48px;
-    padding: 0 0.85rem;
-    font-size: 0.9rem;
+    height: 44px;
+    padding: 0 0.75rem;
+    font-size: 0.88rem;
+  }
+
+  .sidebar-bottom {
+    padding-top: 0.5rem;
+  }
+
+  .sidebar-reopen-btn {
+    top: 12px;
+    left: 12px;
   }
 }
