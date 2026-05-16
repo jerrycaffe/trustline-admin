@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import '../css/Sidebar.css';
 import { FaRegFileLines, FaRegUser } from 'react-icons/fa6';
 import { RxDashboard } from 'react-icons/rx';
-import { BiPieChartAlt2, BiLogOut } from 'react-icons/bi';
+import { BiLogOut } from 'react-icons/bi';
 import { RiStackLine } from 'react-icons/ri';
 import { PiChatsCircleLight } from 'react-icons/pi';
 import { FaHandHoldingHeart } from 'react-icons/fa';
@@ -16,8 +16,7 @@ const navItems = [
   { label: 'Users', path: '/users', icon: FaRegUser },
   { label: 'Chats', path: '/chats', icon: PiChatsCircleLight },
   { label: 'Resources', path: '/resources', icon: RiStackLine },
-  { label: 'Analytics', path: '/analytics', icon: BiPieChartAlt2 },
-  { label: 'Activities', path: '/activities', icon: FaHandHoldingHeart, badge: 1 },
+  { label: 'Activities', path: '/activities', icon: FaHandHoldingHeart },
   { label: 'Settings', path: '/settings', icon: IoIosSettings },
 ];
 

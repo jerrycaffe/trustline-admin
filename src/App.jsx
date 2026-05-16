@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Router, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
+import SessionExpiredModal from './components/SessionExpiredModal'
 import Login from './components/Login'
 import ForgotPassword from './components/ForgotPassword'
 import ResetPassword from './components/ResetPassword'
@@ -11,7 +12,6 @@ import ReportChat from './components/ReportChat'
 import Users from './components/Users'
 import UserDetails from './components/UserDetails'
 import Resources from './components/Resources'
-import Analytics from './components/Analytics'
 import Activities from './components/Activities'
 import Support from './components/Support'
 import Settings from './components/Settings'
@@ -24,6 +24,7 @@ const App = () => {
   return (
     <>
       <Toaster position='top-right' />
+      <SessionExpiredModal />
       <Routes>
         <Route path='/' element={<Navigate to='/login' replace />} />
         <Route path='/login' element={<Login />} />
@@ -33,15 +34,17 @@ const App = () => {
         <Route path='/chats/:chatId' element={<ChatsHistory />} />
         <Route path='/dashboard' element={<Dashboard />} />
         <Route path='/reports' element={<Reports />} />
+        <Route path='/reports/details/:caseId' element={<ReportDetails />} />
         <Route path='/reports/details' element={<ReportDetails />} />
         <Route path='/reports/chat' element={<ReportChat />} />
         <Route path='/users' element={<Users />} />
+        <Route path='/users/details/:userId' element={<UserDetails />} />
         <Route path='/users/details' element={<UserDetails />} />
         <Route path='/resources' element={<Resources />} />
-        <Route path='/analytics' element={<Analytics />} />
         <Route path='/activities' element={<Activities />} />
         <Route path='/support' element={<Support />} />
-        <Route path='/settings' element={<Settings />} />
+        <Route path='/settings' element={<Navigate to='/settings/incident-types' replace />} />
+        <Route path='/settings/:section' element={<Settings />} />
         <Route path='*' element={<Navigate to='/login' replace />} />
       </Routes>
     </>

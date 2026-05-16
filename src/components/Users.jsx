@@ -1,13 +1,9 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import '../css/Users.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
-import aina from '../assets/aina.png'
-import wade from '../assets/wade.png'
-import jenny from '../assets/jenny.png'
-import jane from '../assets/jane.png'
-import profilepic from '../assets/profilepic.png'
+import { api } from '../services/api'
 
 import { FaLongArrowAltDown, FaLongArrowAltUp, FaMale, FaFemale, FaUser } from "react-icons/fa";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
@@ -23,6 +19,83 @@ const SORT_FIELDS = [
 
 const PAGE_SIZE_OPTIONS = [20, 10, 30, 50]
 
+const extractUsersResponse = (response) => {
+  const directItems = Array.isArray(response) ? response : null
+  const dataObject = response?.data && typeof response.data === 'object' ? response.data : null
+
+  const items = directItems
+    || (Array.isArray(response?.data) ? response.data : null)
+    || (Array.isArray(dataObject?.content) ? dataObject.content : null)
+    || (Array.isArray(dataObject?.items) ? dataObject.items : null)
+    || (Array.isArray(dataObject?.users) ? dataObject.users : null)
+    || []
+
+  const totalRaw =
+    response?.total
+    ?? dataObject?.total
+    ?? response?.count
+    ?? dataObject?.count
+    ?? response?.totalCount
+    ?? dataObject?.totalCount
+
+  const total = Number(totalRaw)
+
+  return {
+    items,
+    total: Number.isFinite(total) ? total : items.length,
+  }
+}
+
+const normalizeUser = (user) => {
+  if (!user || typeof user !== 'object') {
+    return null
+  }
+
+  const firstName = String(user.firstName || '').trim()
+  const lastName = String(user.lastName || '').trim()
+  const email = String(user.email || '').trim()
+  const fallbackName = email ? email.split('@')[0] : 'Unknown User'
+  const fullName = `${firstName} ${lastName}`.trim() || fallbackName
+
+  const roles = Array.isArray(user.roles)
+    ? user.roles.map((role) => String(role || '').trim()).filter(Boolean)
+    : []
+
+  const rawDateValue = user.createdAt || user.dateRegistered || user.dateJoined || ''
+  const parsedDate = rawDateValue ? new Date(rawDateValue) : null
+  const hasValidDate = Boolean(parsedDate && !Number.isNaN(parsedDate.getTime()))
+
+  const normalizedGender = String(user.gender || '').toLowerCase()
+  const gender = normalizedGender === 'male' || normalizedGender === 'female'
+    ? normalizedGender
+    : 'not-set'
+
+  return {
+    id: user.userId ?? user.id ?? user._id ?? `user-${Date.now()}`,
+    firstName: firstName || fallbackName,
+    lastName,
+    name: fullName,
+    email: email || 'Not available',
+    gender,
+    phoneNumber: user.phoneNumber || 'Not available',
+    dateRegistered: hasValidDate
+      ? parsedDate.toLocaleDateString('en-US', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+      : 'N/A',
+    dateRegisteredISO: hasValidDate ? parsedDate.toISOString().slice(0, 10) : '',
+    dateRegisteredUnix: hasValidDate ? parsedDate.getTime() : 0,
+    ongoingCases: Number(user.ongoingCases ?? 0) || 0,
+    status: String(user.status || 'Unknown'),
+    roles,
+    unit: user.unit || 'Unassigned',
+    adminId: user.userId || 'N/A',
+    position: roles[0] || 'User',
+  }
+}
+
 const Users = () => {
   const location = useLocation()
   const navigate = useNavigate()
@@ -33,33 +106,122 @@ const Users = () => {
   const [pendingSortField, setPendingSortField] = useState('name')
   const [pendingSortDir, setPendingSortDir] = useState('asc')
 
-  const [filters, setFilters] = useState({
+  const [filtersDraft, setFiltersDraft] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
     gender: '',
-    dateRegistered: '',
+    verifiedStatus: '',
+  })
+  const [appliedFilters, setAppliedFilters] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    gender: '',
+    verifiedStatus: '',
   })
 
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [users, setUsers] = useState([])
+  const [isLoadingUsers, setIsLoadingUsers] = useState(true)
+  const [totalUsers, setTotalUsers] = useState(0)
 
-  const tableHead = ["Name","Gender","Email","Phone Number","Date Registered","Ongoing Cases"]
+  const tableHead = ["Name","Gender","Email","Phone Number","Date Registered","Ongoing Cases", "Status"]
+
+  useEffect(() => {
+    let isActive = true
+
+    const loadUsers = async () => {
+      setIsLoadingUsers(true)
+
+      try {
+        const params = new URLSearchParams()
+        params.set('offset', String(Math.max(0, (currentPage - 1) * pageSize)))
+        params.set('limit', String(pageSize))
+
+        if (appliedFilters.email.trim()) {
+          params.set('email', appliedFilters.email.trim())
+        }
+
+        if (appliedFilters.firstName.trim()) {
+          params.set('firstName', appliedFilters.firstName.trim())
+        }
+
+        if (appliedFilters.lastName.trim()) {
+          params.set('lastName', appliedFilters.lastName.trim())
+        }
+
+        if (appliedFilters.gender) {
+          params.set('gender', String(appliedFilters.gender).toUpperCase())
+        }
+
+        if (appliedFilters.verifiedStatus) {
+          params.set('verifiedStatus', appliedFilters.verifiedStatus)
+        }
+
+        const response = await api.get(`/api/v1/admin/users?${params.toString()}`)
+        const { items, total } = extractUsersResponse(response)
+        const normalizedUsers = items
+          .map(normalizeUser)
+          .filter(Boolean)
+
+        if (!isActive) return
+        setUsers(normalizedUsers)
+        setTotalUsers(total)
+      } catch (error) {
+        if (!isActive) return
+        setUsers([])
+        setTotalUsers(0)
+      } finally {
+        if (isActive) {
+          setIsLoadingUsers(false)
+        }
+      }
+    }
+
+    loadUsers()
+
+    return () => {
+      isActive = false
+    }
+  }, [appliedFilters, currentPage, pageSize])
 
   function handleFilterOpen() { setIsFilterOpen(true) }
   function handleFilterClose() { setIsFilterOpen(false) }
   
   function handleFilterChange(event) {
     const { name, value } = event.target
-    setFilters(prev => ({
+    setFiltersDraft(prev => ({
       ...prev,
       [name]: value,
     }))
   }
   
   function handleResetFilters() {
-    setFilters({ gender: '', dateRegistered: '' })
+    const resetFilters = {
+      firstName: '',
+      lastName: '',
+      email: '',
+      gender: '',
+      verifiedStatus: '',
+    }
+
+    setFiltersDraft(resetFilters)
+    setAppliedFilters(resetFilters)
+    setCurrentPage(1)
   }
   
   function handleApplyFilters(event) {
     event.preventDefault()
+    setAppliedFilters({
+      firstName: filtersDraft.firstName,
+      lastName: filtersDraft.lastName,
+      email: filtersDraft.email,
+      gender: filtersDraft.gender,
+      verifiedStatus: filtersDraft.verifiedStatus,
+    })
+    setCurrentPage(1)
     handleFilterClose()
   }
 
@@ -70,112 +232,37 @@ const Users = () => {
     setIsSortOpen(false)
   }
 
-const topTableContent = [
-  {
-  image:jenny,
-   gender:"female",
-   name:"Jenny Wilson",
-   email: "jennywilson@gmail.com",
-   phoneNumber: "+234 811 345 2201",
-   dateRegistered: "12th June, 2024",
-   ongoingCases:"0",
-  },
-  {
-    image:wade,
-   gender:"male",
-   name:"Wade Warren",
-   email: "wadewarren@gmail.com",
-   phoneNumber: "+234 803 445 2245",
-   dateRegistered: "5th July, 2024",
-   ongoingCases:"0",
-  },
-]
+  const sortedUsers = [...users].sort((a, b) => {
+    let comparison = 0
 
-const secondTableContent = [
-  {
-  image:aina,
-   gender:"female",
-   name:"Modupe Aina",
-   email: "modupe077@gmail.com",
-   phoneNumber: "+234 801 886 7528",
-   dateRegistered: "12th June, 2024",
-   ongoingCases:"3",
-  },
-  {
-    image:aina,
-   gender:"female",
-   name:"Modupe Aina",
-   email: "modupe077@gmail.com",
-   phoneNumber: "+234 801 886 7528",
-   dateRegistered: "12th June, 2024",
-   ongoingCases:"3",
-  },
-  {
-    image:jane,
-   gender:"female",
-   name:"Jane Doe",
-   email: "janedoe@gmail.com",
-   phoneNumber: "+234 808 100 9920",
-   dateRegistered: "20th May, 2024",
-   ongoingCases:"1",
-  },
-  {
-    image:profilepic,
-   gender:"not-set",
-   name:"Jane Doe",
-   email: "janedoe@gmail.com",
-   phoneNumber: "+234 808 100 9920",
-   dateRegistered: "20th May, 2024",
-   ongoingCases:"1",
-  },
-  {
-    image:jenny,
-   gender:"female",
-   name:"Jenny Wilson",
-   email: "jennywilson@gmail.com",
-   phoneNumber: "+234 811 345 2201",
-   dateRegistered: "12th June, 2024",
-   ongoingCases:"0",
-  },
-  {
-    image:profilepic,
-   gender:"not-set",
-   name:"Jenny Wilson",
-   email: "jennywilson@gmail.com",
-   phoneNumber: "+234 811 345 2201",
-   dateRegistered: "12th June, 2024",
-   ongoingCases:"0",
-  },
-  {
-    image:wade,
-   gender:"male",
-   name:"Wade Warren",
-   email: "wadewarren@gmail.com",
-   phoneNumber: "+234 803 445 2245",
-   dateRegistered: "5th July, 2024",
-   ongoingCases:"4",
-  },
-  {
-    image:wade,
-   gender:"male",
-   name:"Wade Warren",
-   email: "wadewarren@gmail.com",
-   phoneNumber: "+234 803 445 2245",
-   dateRegistered: "5th July, 2024",
-   ongoingCases:"4",
-  },
-]
+    if (pendingSortField === 'name') {
+      comparison = a.name.localeCompare(b.name)
+    } else if (pendingSortField === 'gender') {
+      comparison = a.gender.localeCompare(b.gender)
+    } else if (pendingSortField === 'dateRegistered') {
+      comparison = (a.dateRegisteredUnix || 0) - (b.dateRegisteredUnix || 0)
+    } else if (pendingSortField === 'ongoingCases') {
+      comparison = (a.ongoingCases || 0) - (b.ongoingCases || 0)
+    }
 
-const allUsersContent = [...topTableContent, ...secondTableContent]
+    return pendingSortDir === 'desc' ? comparison * -1 : comparison
+  })
 
-const totalPages = Math.max(1, Math.ceil(allUsersContent.length / pageSize))
-const pageItems = allUsersContent.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-const startItem = allUsersContent.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
-const endItem = allUsersContent.length === 0 ? 0 : Math.min(currentPage * pageSize, allUsersContent.length)
+  const allUsersContent = sortedUsers
+  const totalPages = Math.max(1, Math.ceil(totalUsers / pageSize))
+  const pageItems = allUsersContent
+  const startItem = totalUsers === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endItem = totalUsers === 0 ? 0 : Math.min(currentPage * pageSize, totalUsers)
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages)
+    }
+  }, [currentPage, totalPages])
 
 function handleOpenUserDetails(user) {
   const sourcePath = `${location.pathname}${location.search}${location.hash}`
-  navigate('/users/details', { state: { user, from: sourcePath } })
+  navigate(`/users/details/${user.id}`, { state: { user, from: sourcePath } })
 }
 
   return (
@@ -206,9 +293,21 @@ function handleOpenUserDetails(user) {
                 </tr>
               </thead>
               <tbody>
-                {pageItems.map((value, index) => (
+                {isLoadingUsers ? (
+                  <tr>
+                    <td colSpan={tableHead.length}>Loading users...</td>
+                  </tr>
+                ) : null}
+
+                {!isLoadingUsers && pageItems.length === 0 ? (
+                  <tr>
+                    <td colSpan={tableHead.length}>No users found.</td>
+                  </tr>
+                ) : null}
+
+                {!isLoadingUsers && pageItems.map((value) => (
                 <List 
-                  key={index}
+                  key={value.id}
                   user={value}
                   gender={value.gender}
                   name={value.name}
@@ -216,6 +315,7 @@ function handleOpenUserDetails(user) {
                   phoneNumber={value.phoneNumber}
                   dateRegistered={value.dateRegistered}
                   ongoingCases={value.ongoingCases}
+                  status={value.status}
                   onOpenDetails={handleOpenUserDetails}
                 /> 
                 ))}
@@ -226,7 +326,7 @@ function handleOpenUserDetails(user) {
           <div className='users-pagination'>
             <div className='pagination-left'>
               <p className='pagination-info'>
-                Showing {startItem}&#8211;{endItem} of {allUsersContent.length} users
+                Showing {startItem}&#8211;{endItem} of {totalUsers} users
               </p>
               <div className='page-size-wrap'>
                 <label htmlFor='users-page-size'>Rows per page</label>
@@ -286,27 +386,59 @@ function handleOpenUserDetails(user) {
                 </div>
 
                 <form onSubmit={handleApplyFilters} className='users-filter-modal-form'>
+                  <label htmlFor='users-filter-first-name'>First Name</label>
+                  <input
+                    id='users-filter-first-name'
+                    name='firstName'
+                    type='search'
+                    placeholder='Search first name'
+                    value={filtersDraft.firstName}
+                    onChange={handleFilterChange}
+                  />
+
+                  <label htmlFor='users-filter-last-name'>Last Name</label>
+                  <input
+                    id='users-filter-last-name'
+                    name='lastName'
+                    type='search'
+                    placeholder='Search last name'
+                    value={filtersDraft.lastName}
+                    onChange={handleFilterChange}
+                  />
+
+                  <label htmlFor='users-filter-email'>Email</label>
+                  <input
+                    id='users-filter-email'
+                    name='email'
+                    type='search'
+                    placeholder='Search email'
+                    value={filtersDraft.email}
+                    onChange={handleFilterChange}
+                  />
+
                   <label htmlFor='users-filter-gender'>Gender</label>
                   <select
                     id='users-filter-gender'
                     name='gender'
-                    value={filters.gender}
+                    value={filtersDraft.gender}
                     onChange={handleFilterChange}
                   >
                     <option value=''>All genders</option>
-                    <option value='male'>Male</option>
-                    <option value='female'>Female</option>
-                    <option value='not-set'>Not Set</option>
+                    <option value='MALE'>Male</option>
+                    <option value='FEMALE'>Female</option>
                   </select>
 
-                  <label htmlFor='users-filter-date'>Date Registered</label>
-                  <input
-                    id='users-filter-date'
-                    name='dateRegistered'
-                    type='date'
-                    value={filters.dateRegistered}
+                  <label htmlFor='users-filter-verified-status'>Verified Status</label>
+                  <select
+                    id='users-filter-verified-status'
+                    name='verifiedStatus'
+                    value={filtersDraft.verifiedStatus}
                     onChange={handleFilterChange}
-                  />
+                  >
+                    <option value=''>All</option>
+                    <option value='true'>Verified</option>
+                    <option value='false'>Unverified</option>
+                  </select>
 
                   <div className='users-filter-modal-actions'>
                     <button type='button' className='users-ghost-btn' onClick={handleResetFilters}>Reset</button>
@@ -390,7 +522,7 @@ function GenderAvatar({ gender }) {
   )
 }
 
-function  List({ user, gender, name, email, phoneNumber, dateRegistered, ongoingCases, onOpenDetails }){
+function  List({ user, gender, name, email, phoneNumber, dateRegistered, ongoingCases, status, onOpenDetails }){
   return(
     <>
   <tr onClick={() => onOpenDetails(user)}>
@@ -400,6 +532,9 @@ function  List({ user, gender, name, email, phoneNumber, dateRegistered, ongoing
     <td>{phoneNumber}</td>
     <td>{dateRegistered}</td>
     <td>{ongoingCases}</td>
+    <td>
+      <span className={`users-status ${String(status || '').toLowerCase()}`}>{status || 'Unknown'}</span>
+    </td>
   </tr>
   </>)
 }

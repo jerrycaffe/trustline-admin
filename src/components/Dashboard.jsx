@@ -16,11 +16,60 @@ import graph1 from "../assets/graph1.png";
 import graph2 from "../assets/graph2.png";
 import profilepic from "../assets/profilepic.png";
 
+const INCIDENT_TYPE_COLORS = [
+  "#FF7C33",
+  "#FF3389",
+  "#A537FB",
+  "#3DACF5",
+  "#4ECBB2",
+  "#FED634",
+  "#FF6B6B",
+  "#7C4DFF",
+];
+
+const STATUS_COLORS = {
+  PENDING: "#FED634",
+  "IN_PROGRESS": "#3DACF5",
+  "IN PROGRESS": "#3DACF5",
+  INPROGRESS: "#3DACF5",
+  RESOLVED: "#4ECBB2",
+  CLOSED: "#999999",
+};
+
+const STATUS_BADGE_COLORS = {
+  PENDING: { color: "#EAC400", bg: "#EAC4001A" },
+  "IN_PROGRESS": { color: "#3DACF5", bg: "#3DACF51A" },
+  "IN PROGRESS": { color: "#3DACF5", bg: "#3DACF51A" },
+  INPROGRESS: { color: "#3DACF5", bg: "#3DACF51A" },
+  RESOLVED: { color: "#48C9B0", bg: "#48C9B01A" },
+  CLOSED: { color: "#999999", bg: "#9999991A" },
+};
+
+const ACTIVITY_BAR_COLORS = ["#FF3389", "#A537FB", "#3DACF5", "#4ECBB2", "#FED634"];
+
+const titleCase = (value) => {
+  if (!value) return "";
+  return String(value)
+    .toLowerCase()
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+};
+
+const formatPercent = (value) => {
+  if (value === null || value === undefined || Number.isNaN(Number(value))) return "0";
+  const num = Number(value);
+  const rounded = Math.round(num * 100) / 100;
+  return (num > 0 ? "+" : "") + rounded;
+};
+
 const Dashboard = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [isFetchingData, setIsFetchingData] = useState(false);
+  const [overview, setOverview] = useState(null);
+  const [isLoadingOverview, setIsLoadingOverview] = useState(true);
+  const [overviewError, setOverviewError] = useState("");
   const [toast, setToast] = useState({
     visible: false,
     type: "success",
@@ -32,18 +81,106 @@ const Dashboard = () => {
     date: "",
   });
 
+  const fetchOverview = async (params = {}) => {
+    const query = new URLSearchParams();
+    if (params.incidentType) query.append("incidentType", params.incidentType);
+    if (params.status) query.append("status", params.status);
+    if (params.date) query.append("date", params.date);
+    const endpoint = query.toString()
+      ? `api/v1/admin/dashboard/overview?${query.toString()}`
+      : "api/v1/admin/dashboard/overview";
+    const result = await api.get(endpoint);
+    return result?.data ?? result ?? {};
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadOverview = async () => {
+      try {
+        setIsLoadingOverview(true);
+        const payload = await fetchOverview();
+        if (cancelled) return;
+        setOverview(payload);
+        setOverviewError("");
+      } catch (error) {
+        if (cancelled) return;
+        setOverviewError(error.message || "Unable to load dashboard overview.");
+      } finally {
+        if (!cancelled) setIsLoadingOverview(false);
+      }
+    };
+    loadOverview();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const topTableHead = ["Name", "Email"];
-  const reportTypeLegend = [
-    { label: "Gender-based Violence", value: "40%", color: "#FF7C33" },
-    { label: "Sexual Harrassment", value: "45%", color: "#FF3389" },
-    { label: "Rape Issues", value: "15%", color: "#A537FB" },
-  ];
-  const reportStatusLegend = [
-    { label: "Pending", value: "17%", color: "#FED634" },
-    { label: "In Progress", value: "25%", color: "#3DACF5" },
-    { label: "Resolved", value: "43%", color: "#4ECBB2" },
-    { label: "Closed", value: "15%", color: "#999999" },
-  ];
+
+  const casesByIncidentType = Array.isArray(overview?.casesByIncidentType)
+    ? overview.casesByIncidentType
+    : [];
+  const casesByStatus = Array.isArray(overview?.casesByStatus)
+    ? overview.casesByStatus
+    : [];
+
+  const incidentTotal = casesByIncidentType.reduce(
+    (sum, item) => sum + Number(item?.count ?? item?.value ?? 0),
+    0
+  );
+  const statusTotal = casesByStatus.reduce(
+    (sum, item) => sum + Number(item?.count ?? item?.value ?? 0),
+    0
+  );
+
+  const reportTypeLegend = casesByIncidentType.length
+    ? casesByIncidentType.map((item, idx) => {
+        const label = titleCase(item?.incidentType ?? item?.type ?? item?.label ?? "Unknown");
+        const count = Number(item?.count ?? item?.value ?? 0);
+        const pct = item?.percentage != null
+          ? Number(item.percentage)
+          : incidentTotal
+          ? (count / incidentTotal) * 100
+          : 0;
+        return {
+          label,
+          count,
+          value: `${Math.round(pct)}%`,
+          color: INCIDENT_TYPE_COLORS[idx % INCIDENT_TYPE_COLORS.length],
+        };
+      })
+    : [
+        { label: "Gender-based Violence", count: 0, value: "0%", color: "#FF7C33" },
+        { label: "Sexual Harrassment", count: 0, value: "0%", color: "#FF3389" },
+        { label: "Rape Issues", count: 0, value: "0%", color: "#A537FB" },
+      ];
+
+  const reportStatusLegend = casesByStatus.length
+    ? casesByStatus.map((item, idx) => {
+        const rawStatus = item?.status ?? item?.label ?? "Unknown";
+        const label = titleCase(rawStatus);
+        const count = Number(item?.count ?? item?.value ?? 0);
+        const pct = item?.percentage != null
+          ? Number(item.percentage)
+          : statusTotal
+          ? (count / statusTotal) * 100
+          : 0;
+        const key = String(rawStatus).toUpperCase();
+        return {
+          label,
+          count,
+          value: `${Math.round(pct)}%`,
+          color:
+            STATUS_COLORS[key] ||
+            INCIDENT_TYPE_COLORS[idx % INCIDENT_TYPE_COLORS.length],
+        };
+      })
+    : [
+        { label: "Pending", count: 0, value: "0%", color: "#FED634" },
+        { label: "In Progress", count: 0, value: "0%", color: "#3DACF5" },
+        { label: "Resolved", count: 0, value: "0%", color: "#4ECBB2" },
+        { label: "Closed", count: 0, value: "0%", color: "#999999" },
+      ];
 
   const incidentTypeOptions = reportTypeLegend.map((item) => item.label);
   const reportStatusOptions = reportStatusLegend.map((item) => item.label);
@@ -117,29 +254,12 @@ const Dashboard = () => {
 
   const handleApplyFilters = async (event) => {
     event.preventDefault();
-
-    const query = new URLSearchParams();
-
-    if (filters.incidentType) {
-      query.append("incidentType", filters.incidentType);
-    }
-
-    if (filters.status) {
-      query.append("status", filters.status);
-    }
-
-    if (filters.date) {
-      query.append("date", filters.date);
-    }
-
-    const endpoint = query.toString()
-      ? `api/v1/dashboard?${query.toString()}`
-      : "api/v1/dashboard";
-
     try {
       setIsFetchingData(true);
-      await api.get(endpoint);
-      showToast("success", "Dashboard data fetched successfully.");
+      const payload = await fetchOverview(filters);
+      setOverview(payload);
+      setOverviewError("");
+      showToast("success", "Dashboard filtered successfully.");
       closeFilterModal();
     } catch (error) {
       showToast(
@@ -159,99 +279,101 @@ const Dashboard = () => {
     cutout: '62%',
     maintainAspectRatio: false,
   };
-  const topTableContents = [
-    {
-      gender: "female",
-      name: "Modupe Aina",
-      email: "modupe.aina@example.com",
-    },
-    {
-      gender: "female",
-      name: "Jane Doe",
-      email: "jane.doe@example.com",
-    },
-    {
-      gender: "male",
-      name: "Wade Warren",
-      email: "wade.warren@example.com",
-    },
-    {
-      gender: "not mentioned",
-      name: "Jenny Wilson",
-      email: "jenny.wilson@example.com",
-    },
-  ];
+  const topTableContents = Array.isArray(overview?.newUsers) && overview.newUsers.length
+    ? overview.newUsers.map((user) => {
+        const firstName = user?.firstName || "";
+        const lastName = user?.lastName || "";
+        const composed = `${firstName} ${lastName}`.trim();
+        return {
+          gender: (user?.gender || "not mentioned").toLowerCase(),
+          name: composed || user?.name || user?.fullName || user?.username || "Unknown",
+          email: user?.email || user?.emailAddress || "—",
+          phoneNumber: user?.phoneNumber || user?.phone,
+          dateRegistered: user?.createdAt || user?.dateRegistered,
+          lastLogin: user?.lastLogin,
+        };
+      })
+    : [];
 
   const secondTableHead = ["Case No", "Type", "Status", "Tracking", "Reported Date"];
-  const secondTableContent=[
-    {
-      id:"A1208",
-      type:"Sexual Harrassment",
-      status:"Pending",
-      color:"#EAC400",
-      bgcolor:"#EAC4001A",
-      width:"35.88px",
-    },
-    {
-      id:"A2051",
-      type:"Gender-based Violence",
-      status:"In progress",
-      color:"#3DACF5",
-      bgcolor:"#3DACF51A",
-      width:"90.27px",
-    },
-    {
-      id:"A2351",
-      type:"Rape Issues",
-      status:"Resolved",
-      color:"#48C9B0",
-      bgcolor:"#48C9B01A",
-      width:"100%",
-    },
-    {
-      id:"A2051",
-      type:"Gender-based Violence",
-      status:"Pending",
-      color:"#EAC400",
-      bgcolor:"#EAC4001A",
-      width:"62.27px",
-    },
-  ]
+  const secondTableContent = Array.isArray(overview?.recentCases) && overview.recentCases.length
+    ? overview.recentCases.map((c) => {
+        const status = titleCase(c?.status ?? "Pending");
+        const key = String(c?.status ?? "PENDING").toUpperCase();
+        const badge = STATUS_BADGE_COLORS[key] || STATUS_BADGE_COLORS.PENDING;
+        return {
+          id: c?.caseNumber || c?.caseNo || c?.id || "—",
+          type: titleCase(c?.incidentType ?? c?.type ?? "—"),
+          status,
+          color: badge.color,
+          bgcolor: badge.bg,
+          width: key === "RESOLVED" || key === "CLOSED" ? "100%" : "50%",
+          reportedAt: c?.reportedAt || c?.createdAt,
+          raw: c,
+        };
+      })
+    : [];
+
+const buildTrend = (trend) => {
+  if (!trend) {
+    return { percent: "0", color: "#999999", bgcolor: "#9999991A" };
+  }
+  const direction = String(trend.direction || "").toUpperCase();
+  const pct = trend.percentageChange ?? trend.change ?? 0;
+  const isIncrease = direction === "INCREASE" || Number(pct) > 0;
+  return {
+    percent: formatPercent(pct),
+    color: isIncrease ? "#48C9B0" : "#FF0909",
+    bgcolor: isIncrease ? "#48C9B01A" : "#FF09091A",
+  };
+};
 
 const dashboardCards = [
   {
-    text:"new users",
-    number:"20",
-    percent:"+15",
-    image:graph1,
-    color:"#48C9B0",
-    bgcolor:"#48C9B01A"
+    text: "new users",
+    number: String(overview?.newUsersCount ?? 0),
+    image: graph1,
+    ...buildTrend(overview?.newUsersTrend),
   },
   {
-    text:"new reports",
-    number:"17",
-    percent:"-0.15",
-    image:graph2,
-    color:"#FF0909",
-    bgcolor:"#FF09091A",
+    text: "new reports",
+    number: String(overview?.newReports ?? overview?.newReportsCount ?? 0),
+    image: graph2,
+    ...buildTrend(overview?.newReportsTrend),
   },
   {
-    text:"total users",
-    number:"205",
-    percent:"+15",
-    image:graph1,
-    color:"#48C9B0",
-    bgcolor:"#48C9B01A",
+    text: "total users",
+    number: String(overview?.totalUsers ?? 0),
+    percent: "0",
+    image: graph1,
+    color: "#48C9B0",
+    bgcolor: "#48C9B01A",
   },
   {
-    text:"total reports",
-    number:"317",
-    percent:"+15",
-    image:graph1,
-    color:"#48C9B0",
-    bgcolor:"#48C9B01A",
-  }
-]
+    text: "total reports",
+    number: String(overview?.totalReports ?? 0),
+    percent: "0",
+    image: graph1,
+    color: "#48C9B0",
+    bgcolor: "#48C9B01A",
+  },
+];
+
+const activitiesList = Array.isArray(overview?.activities) ? overview.activities : [];
+const activitiesMaxCount = activitiesList.reduce(
+  (max, a) => Math.max(max, Number(a?.count ?? a?.usageCount ?? a?.value ?? 0)),
+  0
+);
+const dashboardActivities = activitiesList.slice(0, 5).map((a, idx) => {
+  const count = Number(a?.count ?? a?.usageCount ?? a?.value ?? 0);
+  const ratio = activitiesMaxCount ? count / activitiesMaxCount : 0;
+  return {
+    label: a?.name || a?.label || a?.title || `Activity ${idx + 1}`,
+    width: `${Math.max(8, Math.round(ratio * 185))}px`,
+    color: idx === 0 ? ACTIVITY_BAR_COLORS[0] : "#E0E0E0",
+    count,
+  };
+});
 
   function handleOpenUserDetails(user) {
     const sourcePath = `${location.pathname}${location.search}${location.hash}`;
@@ -294,6 +416,20 @@ const dashboardCards = [
               Filter
             </button>
           </div>
+          {overviewError && (
+            <div
+              role="alert"
+              style={{
+                background: "#FF09091A",
+                color: "#FF0909",
+                padding: "8px 12px",
+                borderRadius: 8,
+                fontSize: 13,
+              }}
+            >
+              {overviewError}
+            </div>
+          )}
           <div className="cards">
         {dashboardCards.map((value, index) => (
           <Dashboardcard
@@ -335,16 +471,24 @@ const dashboardCards = [
                 </tr>
               </thead>
               <tbody>
-                {topTableContents.map((value, index) => (
-                  <UsersList
-                    key={index}
-                    user={value}
-                    gender={value.gender}
-                    name={value.name}
-                    email={value.email}
-                    onOpenDetails={handleOpenUserDetails}
-                  />
-                ))}
+                {topTableContents.length === 0 ? (
+                  <tr>
+                    <td colSpan={topTableHead.length} style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>
+                      {isLoadingOverview ? "Loading users..." : "No new users"}
+                    </td>
+                  </tr>
+                ) : (
+                  topTableContents.map((value, index) => (
+                    <UsersList
+                      key={index}
+                      user={value}
+                      gender={value.gender}
+                      name={value.name}
+                      email={value.email}
+                      onOpenDetails={handleOpenUserDetails}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
           </div>
@@ -356,11 +500,20 @@ const dashboardCards = [
               <p>Most popular activity</p>
             </div>
             <div className="exercises">
-              <ZenExercise text="Sleep" width="185px" color="#FF3389" />
-              <ZenExercise text="Meditation" width="73px" color="#E0E0E0" />
-              <ZenExercise text="Anxiety" width="139px" color="#E0E0E0" />
-              <ZenExercise text="Journaling" width="110px" color="#E0E0E0" />
-              <ZenExercise text="Others" width="92px" color="#E0E0E0" />
+              {dashboardActivities.length ? (
+                dashboardActivities.map((activity) => (
+                  <ZenExercise
+                    key={activity.label}
+                    text={activity.label}
+                    width={activity.width}
+                    color={activity.color}
+                  />
+                ))
+              ) : (
+                <p style={{ fontSize: 12, color: "#999" }}>
+                  {isLoadingOverview ? "Loading..." : "No activities yet"}
+                </p>
+              )}
             </div>
             <button>Add New Exercise +</button>
           </div>
@@ -389,18 +542,26 @@ const dashboardCards = [
                   </tr>
                 </thead>
                 <tbody>
-                  {secondTableContent.map((value, index) => (
-                    <ReportList
-                      key={index}
-                      report={value}
-                      id={value.id}
-                      type={value.type}
-                      status={value.status}
-                      color={value.color}
-                      bgcolor={value.bgcolor}
-                      width={value.width}
-                    />
-                  ))}
+                  {secondTableContent.length === 0 ? (
+                    <tr>
+                      <td colSpan={secondTableHead.length} style={{ textAlign: "center", color: "#999", padding: "16px 0" }}>
+                        {isLoadingOverview ? "Loading reports..." : "No recent reports"}
+                      </td>
+                    </tr>
+                  ) : (
+                    secondTableContent.map((value, index) => (
+                      <ReportList
+                        key={index}
+                        report={value}
+                        id={value.id}
+                        type={value.type}
+                        status={value.status}
+                        color={value.color}
+                        bgcolor={value.bgcolor}
+                        width={value.width}
+                      />
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
@@ -416,16 +577,12 @@ const dashboardCards = [
                 <Doughnut
                   options={overviewChartOptions}
                   data={{
-                    labels: [
-                      "Gender-based Violence",
-                      "Sexual Harrassment",
-                      "Rape Issues",
-                    ],
+                    labels: reportTypeLegend.map((i) => i.label),
                     datasets: [
                       {
                         labels: "Report",
-                        data: [40, 45, 15],
-                        backgroundColor: ["#FF7C33", "#FF3389", "#A537FB"],
+                        data: reportTypeLegend.map((i) => i.count || 0),
+                        backgroundColor: reportTypeLegend.map((i) => i.color),
                         borderRadius: 4,
                       },
                     ],
@@ -450,17 +607,12 @@ const dashboardCards = [
                 <Doughnut
                   options={overviewChartOptions}
                   data={{
-                    labels: ["Pending", "In Progress", "Resolved", "Closed"],
+                    labels: reportStatusLegend.map((i) => i.label),
                     datasets: [
                       {
                         labels: "Report",
-                        data: [17, 25, 43, 15],
-                        backgroundColor: [
-                          "#FED634",
-                          "#3DACF5",
-                          "#4ECBB2",
-                          "#999999",
-                        ],
+                        data: reportStatusLegend.map((i) => i.count || 0),
+                        backgroundColor: reportStatusLegend.map((i) => i.color),
                         borderRadius: 4,
                       },
                     ],
@@ -760,7 +912,7 @@ function formatDate(date) {
           <div className="progress" style={{ width: progressWidth }}></div>
         </div>
       </td>
-      <td>{formatDate(new Date())}</td>
+      <td>{formatDate(report?.reportedAt || new Date())}</td>
     </tr>
   </>);
 }

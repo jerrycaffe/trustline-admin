@@ -295,6 +295,36 @@
     color: #2d3f45;
 }
 
+.reports .reports-body table tbody td.reports-empty-cell {
+    padding: 44px 20px;
+    white-space: normal;
+}
+
+.reports-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #6e7b84;
+}
+
+.reports-empty-icon {
+    color: #9aa6c2;
+}
+
+.reports-empty-state p {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #34454d;
+}
+
+.reports-empty-state span {
+    font-size: 12px;
+    color: #7c8790;
+}
+
 .reports .reports-body .status{
     border-radius: 58px;
         min-width: 88px;
