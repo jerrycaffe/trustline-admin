@@ -34,10 +34,12 @@ const getStoredToken = () => {
   }
 };
 
-const createHeaders = (includeAuth = false) => {
-  const headers = {
-    "Content-Type": "application/json",
-  };
+const createHeaders = (includeAuth = false, skipContentType = false) => {
+  const headers = {};
+
+  if (!skipContentType) {
+    headers["Content-Type"] = "application/json";
+  }
 
   if (includeAuth) {
     const token = getStoredToken();
@@ -83,19 +85,60 @@ const getErrorMessage = (response, result) => {
   );
 };
 
+const dispatchSessionExpired = () => {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new CustomEvent("sessionExpired"));
+  }
+};
+
+export const getStoredEmail = () => {
+  if (typeof window === "undefined" || !STORAGE_SECRET) {
+    return "";
+  }
+
+  const encrypted = localStorage.getItem("authEmail");
+  if (!encrypted) return "";
+
+  try {
+    const decrypted = CryptoJS.AES.decrypt(encrypted, STORAGE_SECRET).toString(
+      CryptoJS.enc.Utf8,
+    );
+    return JSON.parse(decrypted) || "";
+  } catch {
+    return "";
+  }
+};
+
 export const api = {
   post: async (uri, data, options = {}) => {
     const { auth = false } = options;
+    const isFormData = data instanceof FormData;
 
-    const response = await fetch(buildUrl(uri), {
+    const fetchOptions = {
       method: "POST",
-      headers: createHeaders(auth),
-      body: JSON.stringify(data),
-    });
+      body: isFormData ? data : JSON.stringify(data),
+    };
+
+    if (isFormData) {
+      // For FormData, let browser auto-set multipart/form-data boundary
+      // Only add Authorization header if needed
+      if (auth) {
+        const token = getStoredToken();
+        if (token) {
+          fetchOptions.headers = { Authorization: `Bearer ${token}` };
+        }
+      }
+    } else {
+      // For JSON requests, include standard headers
+      fetchOptions.headers = createHeaders(auth, false);
+    }
+
+    const response = await fetch(buildUrl(uri), fetchOptions);
 
     const result = await parseResponseBody(response);
 
     if (!response.ok || result?.error) {
+      if (response.status === 401) dispatchSessionExpired();
       throw new Error(getErrorMessage(response, result));
     }
 
@@ -111,6 +154,7 @@ export const api = {
     const result = await parseResponseBody(response);
 
     if (!response.ok || result?.error) {
+      if (response.status === 401) dispatchSessionExpired();
       throw new Error(getErrorMessage(response, result));
     }
 
@@ -119,16 +163,30 @@ export const api = {
 
   put: async (uri, data, options = {}) => {
     const { auth = false } = options;
+    const isFormData = data instanceof FormData;
 
-    const response = await fetch(buildUrl(uri), {
+    const fetchOptions = {
       method: "PUT",
-      headers: createHeaders(auth),
-      body: JSON.stringify(data),
-    });
+      body: isFormData ? data : JSON.stringify(data),
+    };
+
+    if (isFormData) {
+      if (auth) {
+        const token = getStoredToken();
+        if (token) {
+          fetchOptions.headers = { Authorization: `Bearer ${token}` };
+        }
+      }
+    } else {
+      fetchOptions.headers = createHeaders(auth, false);
+    }
+
+    const response = await fetch(buildUrl(uri), fetchOptions);
 
     const result = await parseResponseBody(response);
 
     if (!response.ok || result?.error) {
+      if (response.status === 401) dispatchSessionExpired();
       throw new Error(getErrorMessage(response, result));
     }
 
@@ -151,6 +209,7 @@ export const api = {
     const result = await parseResponseBody(response);
 
     if (!response.ok || result?.error) {
+      if (response.status === 401) dispatchSessionExpired();
       throw new Error(getErrorMessage(response, result));
     }
 

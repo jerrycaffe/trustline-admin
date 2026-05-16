@@ -1,16 +1,18 @@
-import React, { useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import '../css/Reports.css'
+import { api } from '../services/api'
+import toast from 'react-hot-toast'
 
 import { FaLongArrowAltDown, FaLongArrowAltUp } from "react-icons/fa";
 import { HiOutlineAdjustmentsVertical } from "react-icons/hi2";
 import { IoMdClose } from "react-icons/io";
-import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
+import { MdKeyboardArrowLeft, MdKeyboardArrowRight, MdOutlineInbox } from "react-icons/md";
 
 const SORT_FIELDS = [
-  { value: 'id',            label: 'Case No.' },
+  { value: 'displayCaseNumber', label: 'Case No.' },
   { value: 'date',          label: 'Date' },
   { value: 'reportedBy',    label: 'Reported By' },
   { value: 'reportedEmail', label: 'Email' },
@@ -33,11 +35,26 @@ const Reports = () => {
 
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0])
+  const [cases, setCases] = useState([])
+  const [paginationMeta, setPaginationMeta] = useState({
+    count: 0,
+    total: 0,
+    last: true,
+  })
+  const [isLoading, setIsLoading] = useState(false)
+  const [incidentTypes, setIncidentTypes] = useState([])
 
   const [filters, setFilters] = useState({
-    type: '',
+    incidentTypeId: '',
     status: '',
-    date: '',
+    startDate: '',
+    endDate: '',
+  })
+  const [appliedFilters, setAppliedFilters] = useState({
+    incidentTypeId: '',
+    status: '',
+    startDate: '',
+    endDate: '',
   })
 
   function handleFilterOpen()  { setIsFilterOpen(true) }
@@ -52,11 +69,13 @@ const Reports = () => {
   }
   
   function handleResetFilters() {
-    setFilters({ type: '', status: '', date: '' })
+    setFilters({ incidentTypeId: '', status: '', startDate: '', endDate: '' })
   }
   
   function handleApplyFilters(event) {
     event.preventDefault()
+    setAppliedFilters({ ...filters })
+    setCurrentPage(1)
     handleFilterClose()
   }
 
@@ -75,49 +94,142 @@ const Reports = () => {
 
   function handleOpenReportDetails(report) {
     const sourcePath = `${location.pathname}${location.search}${location.hash}`
-    navigate('/reports/details', { state: { report, from: sourcePath } })
+    const detailsCaseId = report?.caseId || report?.id
+    const targetPath = detailsCaseId ? `/reports/details/${detailsCaseId}` : '/reports/details'
+    navigate(targetPath, { state: { report, from: sourcePath } })
   }
 
   const tableHead = ["Case No.", "Incident", "Reported By", "Reporter Email", "Status", "Tracking", "Reported Date"]
-  const tableContent = [
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Jane Doe",     reportedEmail: "jane.doe@example.com",    status: "Pending",     date: "02-07-24", width: "10%" },
-    { id: "A2051", type: "Gender-based violence", reportedBy: "Wade Warren",  reportedEmail: "wade.warren@example.com", status: "Pending",     date: "22-06-24", width: "5%" },
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Jenny Wilson", reportedEmail: "jenny.wilson@example.com",status: "In Progress", date: "02-07-24", width: "35%" },
-    { id: "A2351", type: "Rape Issues",           reportedBy: "Modupe Aina",  reportedEmail: "modupe.aina@example.com", status: "Resolved",    date: "12-06-24", width: "80%" },
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Jane Doe",     reportedEmail: "jane.doe@example.com",    status: "Pending",     date: "02-07-24", width: "5%" },
-    { id: "A2351", type: "Rape Issues",           reportedBy: "Wade Warren",  reportedEmail: "wade.warren@example.com", status: "Resolved",    date: "12-06-24", width: "80%" },
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Jenny Wilson", reportedEmail: "jenny.wilson@example.com",status: "Pending",     date: "02-07-24", width: "5%" },
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Modupe Aina",  reportedEmail: "modupe.aina@example.com", status: "In Progress", date: "02-07-24", width: "35%" },
-    { id: "A2351", type: "Rape Issues",           reportedBy: "Jane Doe",     reportedEmail: "jane.doe@example.com",    status: "Closed",      date: "12-06-24", width: "100%" },
-    { id: "A2051", type: "Gender-based violence", reportedBy: "Wade Warren",  reportedEmail: "wade.warren@example.com", status: "Pending",     date: "22-06-24", width: "5%" },
-    { id: "A2051", type: "Gender-based violence", reportedBy: "Jenny Wilson", reportedEmail: "jenny.wilson@example.com",status: "In Progress", date: "22-06-24", width: "35%" },
-    { id: "A1208", type: "Sexual Harassment",     reportedBy: "Modupe Aina",  reportedEmail: "modupe.aina@example.com", status: "Closed",      date: "02-07-24", width: "100%" },
-  ]
 
-  const parseDate = (str) => {
-    const m = /^([0-9]{2})-([0-9]{2})-([0-9]{2})$/.exec(str || '')
-    if (m) return new Date(2000 + Number(m[3]), Number(m[2]) - 1, Number(m[1]))
-    return new Date(str)
-  }
+  useEffect(() => {
+    const fetchCases = async () => {
+      setIsLoading(true)
 
-  const sorted = [...tableContent].sort((a, b) => {
-    let valA, valB
-    if (sortField === 'date') {
-      valA = parseDate(a.date).getTime()
-      valB = parseDate(b.date).getTime()
-    } else {
-      valA = (a[sortField] || '').toLowerCase()
-      valB = (b[sortField] || '').toLowerCase()
+      try {
+        const query = new URLSearchParams({
+          offset: String(Math.max(0, (currentPage - 1) * pageSize)),
+          limit: String(pageSize),
+        })
+
+        if (appliedFilters.incidentTypeId) {
+          query.append('incidentTypeId', appliedFilters.incidentTypeId)
+        }
+        if (appliedFilters.status) {
+          query.append('status', appliedFilters.status)
+        }
+        if (appliedFilters.startDate) {
+          query.append('startDate', appliedFilters.startDate)
+        }
+        if (appliedFilters.endDate) {
+          query.append('endDate', appliedFilters.endDate)
+        }
+
+        const response = await api.get(`/api/v1/cases?${query.toString()}`)
+        const data = response?.data || {}
+        const content = Array.isArray(data.content) ? data.content : []
+
+        setCases(content)
+        setPaginationMeta({
+          count: Number(data.count ?? content.length) || 0,
+          total: Number(data.total ?? content.length) || 0,
+          last: Boolean(data.last),
+        })
+      } catch (error) {
+        setCases([])
+        setPaginationMeta({ count: 0, total: 0, last: true })
+        toast.error(error?.message || 'Unable to fetch reports at the moment.')
+      } finally {
+        setIsLoading(false)
+      }
     }
-    if (valA < valB) return sortDir === 'asc' ? -1 : 1
-    if (valA > valB) return sortDir === 'asc' ? 1  : -1
-    return 0
-  })
 
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize))
-  const pageItems  = sorted.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-  const startItem = sorted.length === 0 ? 0 : (currentPage - 1) * pageSize + 1
-  const endItem = sorted.length === 0 ? 0 : Math.min(currentPage * pageSize, sorted.length)
+    fetchCases()
+  }, [currentPage, pageSize, appliedFilters])
+
+  useEffect(() => {
+    const fetchIncidentTypes = async () => {
+      try {
+        const response = await api.get('/api/v1/incident-types')
+        const data = Array.isArray(response?.data) ? response.data : []
+        const normalizedIncidentTypes = data
+          .filter((item) => item?.id && item?.name)
+          .map((item) => ({ id: item.id, name: item.name }))
+
+        setIncidentTypes(normalizedIncidentTypes)
+      } catch {
+        setIncidentTypes([])
+        toast.error('Unable to load incident types.')
+      }
+    }
+
+    fetchIncidentTypes()
+  }, [])
+
+  const mappedRows = useMemo(() => {
+    return cases.map((caseItem) => {
+      const trackingValue = Number(caseItem?.tracking)
+      const normalizedTracking = Number.isFinite(trackingValue)
+        ? (trackingValue <= 1 ? trackingValue * 100 : trackingValue)
+        : 0
+      const trackingPercent = Math.min(100, Math.max(0, Math.round(normalizedTracking)))
+
+      return {
+        ...caseItem,
+        caseId: caseItem?.id || '',
+        displayCaseNumber: caseItem?.caseNumber || 'N/A',
+        type: caseItem?.incidentType || 'N/A',
+        reportedBy: caseItem?.reportedBy || 'N/A',
+        reportedEmail: caseItem?.reportedBy || 'N/A',
+        status: caseItem?.status || 'N/A',
+        date: caseItem?.createdAt || caseItem?.dateOfIncident || '',
+        trackingPercent,
+      }
+    })
+  }, [cases])
+
+  const sortedRows = useMemo(() => {
+    return [...mappedRows].sort((a, b) => {
+      let valA
+      let valB
+
+      if (sortField === 'date') {
+        valA = new Date(a.date).getTime()
+        valB = new Date(b.date).getTime()
+      } else {
+        valA = String(a[sortField] || '').toLowerCase()
+        valB = String(b[sortField] || '').toLowerCase()
+      }
+
+      if (valA < valB) return sortDir === 'asc' ? -1 : 1
+      if (valA > valB) return sortDir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [mappedRows, sortDir, sortField])
+
+  const totalReports = Math.max(0, Number(paginationMeta.total) || 0)
+  const totalPages = Math.max(1, Math.ceil(totalReports / pageSize))
+  const pageItems = sortedRows
+  const startItem = totalReports === 0 ? 0 : (currentPage - 1) * pageSize + 1
+  const endItem = totalReports === 0 ? 0 : Math.min((currentPage - 1) * pageSize + paginationMeta.count, totalReports)
+
+  const visiblePageButtons = useMemo(() => {
+    const maxButtons = 7
+    if (totalPages <= maxButtons) {
+      return Array.from({ length: totalPages }, (_, index) => index + 1)
+    }
+
+    const half = Math.floor(maxButtons / 2)
+    let start = Math.max(1, currentPage - half)
+    let end = Math.min(totalPages, start + maxButtons - 1)
+
+    if (end - start + 1 < maxButtons) {
+      start = Math.max(1, end - maxButtons + 1)
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+  }, [currentPage, totalPages])
+
+  const hasNoReports = !isLoading && pageItems.length === 0
 
   return (
     <>
@@ -148,19 +260,35 @@ const Reports = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {pageItems.map((value, index) => (
+                    {!isLoading && pageItems.map((value) => (
                       <ReportList
-                        key={index}
-                        id={value.id}
+                        key={value.caseId || value.displayCaseNumber}
+                        id={value.displayCaseNumber}
                         type={value.type}
                         reportedBy={value.reportedBy}
                         reportedEmail={value.reportedEmail}
                         status={value.status}
                         date={value.date}
-                        width={value.width}
+                        trackingPercent={value.trackingPercent}
                         onOpenDetails={() => handleOpenReportDetails(value)}
                       />
                     ))}
+                    {isLoading && (
+                      <tr>
+                        <td colSpan={7}>Loading reports...</td>
+                      </tr>
+                    )}
+                    {hasNoReports && (
+                      <tr>
+                        <td colSpan={7} className='reports-empty-cell'>
+                          <div className='reports-empty-state'>
+                            <MdOutlineInbox size={40} className='reports-empty-icon' aria-hidden='true' />
+                            <p>No reports found.</p>
+                            <span>Try adjusting your filters or date range.</span>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -168,7 +296,7 @@ const Reports = () => {
               <div className='reports-pagination'>
                 <div className='pagination-left'>
                   <p className='pagination-info'>
-                    Showing {startItem}&#8211;{endItem} of {sorted.length} reports
+                    Showing {startItem}&#8211;{endItem} of {totalReports} reports
                   </p>
                   <div className='page-size-wrap'>
                     <label htmlFor='reports-page-size'>Rows per page</label>
@@ -192,16 +320,17 @@ const Reports = () => {
                   <button
                     className='page-btn'
                     onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    disabled={currentPage === 1 || isLoading}
                     aria-label="Previous page"
                   >
                     <MdKeyboardArrowLeft size={18}/>
                   </button>
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+                  {visiblePageButtons.map(page => (
                     <button
                       key={page}
                       className={page === currentPage ? 'page-btn is-active' : 'page-btn'}
                       onClick={() => setCurrentPage(page)}
+                      disabled={isLoading}
                       aria-label={"Page " + page}
                       aria-current={page === currentPage ? 'page' : undefined}
                     >
@@ -211,7 +340,7 @@ const Reports = () => {
                   <button
                     className='page-btn'
                     onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
+                    disabled={paginationMeta.last || currentPage === totalPages || isLoading}
                     aria-label="Next page"
                   >
                     <MdKeyboardArrowRight size={18}/>
@@ -232,14 +361,14 @@ const Reports = () => {
                   <label htmlFor='reports-filter-type'>Incident Type</label>
                   <select
                     id='reports-filter-type'
-                    name='type'
-                    value={filters.type}
+                    name='incidentTypeId'
+                    value={filters.incidentTypeId}
                     onChange={handleFilterChange}
                   >
                     <option value=''>All incident types</option>
-                    <option value='Sexual Harassment'>Sexual Harassment</option>
-                    <option value='Gender-based violence'>Gender-based violence</option>
-                    <option value='Rape Issues'>Rape Issues</option>
+                    {incidentTypes.map((incidentType) => (
+                      <option key={incidentType.id} value={incidentType.id}>{incidentType.name}</option>
+                    ))}
                   </select>
 
                   <label htmlFor='reports-filter-status'>Status</label>
@@ -250,18 +379,28 @@ const Reports = () => {
                     onChange={handleFilterChange}
                   >
                     <option value=''>All statuses</option>
-                    <option value='Pending'>Pending</option>
-                    <option value='In Progress'>In Progress</option>
-                    <option value='Resolved'>Resolved</option>
-                    <option value='Closed'>Closed</option>
+                    <option value='VERIFIED'>VERIFIED</option>
+                    <option value='COMPLETED'>COMPLETED</option>
+                    <option value='DISCONTINUED'>DISCONTINUED</option>
+                    <option value='UNVERIFIED'>UNVERIFIED</option>
+                    <option value='PENDING'>PENDING</option>
                   </select>
 
-                  <label htmlFor='reports-filter-date'>Date</label>
+                  <label htmlFor='reports-filter-start-date'>Start Date</label>
                   <input
-                    id='reports-filter-date'
-                    name='date'
+                    id='reports-filter-start-date'
+                    name='startDate'
                     type='date'
-                    value={filters.date}
+                    value={filters.startDate}
+                    onChange={handleFilterChange}
+                  />
+
+                  <label htmlFor='reports-filter-end-date'>End Date</label>
+                  <input
+                    id='reports-filter-end-date'
+                    name='endDate'
+                    type='date'
+                    value={filters.endDate}
                     onChange={handleFilterChange}
                   />
 
@@ -332,14 +471,19 @@ const Reports = () => {
   )
 }
 
-function ReportList({ id, type, reportedBy, reportedEmail, status, date, width, onOpenDetails }) {
+function ReportList({ id, type, reportedBy, reportedEmail, status, date, trackingPercent, onOpenDetails }) {
   let background
   let color
+  const normalizedStatus = String(status || '').toUpperCase()
 
-  if (status === "Resolved")        { background = "#48C9B01A"; color = "#48C9B0" }
-  else if (status === "Pending")    { background = "#EAC4001A"; color = "#EAC400" }
-  else if (status === "In Progress"){ background = "#3DACF51A"; color = "#3DACF5" }
-  else if (status === "Closed")     { background = "#9999991A"; color = "#999999" }
+  if (normalizedStatus === 'VERIFIED')             { background = '#3DACF51A'; color = '#3DACF5' }
+  else if (normalizedStatus === 'COMPLETED')       { background = '#48C9B01A'; color = '#48C9B0' }
+  else if (normalizedStatus === 'DISCONTINUED')    { background = '#9999991A'; color = '#999999' }
+  else if (normalizedStatus === 'UNVERIFIED')      { background = '#EAC4001A'; color = '#EAC400' }
+  else if (normalizedStatus === 'PENDING')         { background = '#F973161A'; color = '#F97316' }
+  else                                              { background = '#9999991A'; color = '#999999' }
+
+  const statusLabel = String(status || 'N/A').replace(/_/g, ' ')
 
   const formatDate = (value) => {
     const parsed = /^([0-9]{2})-([0-9]{2})-([0-9]{2})$/.exec(value || "")
@@ -367,10 +511,10 @@ function ReportList({ id, type, reportedBy, reportedEmail, status, date, width, 
       <td>{type}</td>
       <td>{reportedBy}</td>
       <td>{reportedEmail}</td>
-      <td><span style={{ color, background }} className='status'>{status}</span></td>
+      <td><span style={{ color, background }} className='status'>{statusLabel}</span></td>
       <td>
         <div className='progress-bar'>
-          <div className='progress' style={{ width }}></div>
+          <div className='progress' style={{ width: `${trackingPercent}%` }}></div>
         </div>
       </td>
       <td>{formatDate(date)}</td>

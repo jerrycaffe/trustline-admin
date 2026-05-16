@@ -113,6 +113,7 @@ const Login = () => {
       // Encrypt and store token + all user data
       encryptAndStore('authToken', token);
       encryptAndStore('authUser', { ...payload, ...response });
+      encryptAndStore('authEmail', email);
 
       navigate('/dashboard');
     } catch (error) {

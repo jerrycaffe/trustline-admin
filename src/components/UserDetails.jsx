@@ -1,5 +1,5 @@
-import React from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import React, { useEffect, useMemo, useState } from 'react'
+import { Navigate, useLocation, useNavigate, useParams } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import '../css/UserProfile.css'
@@ -7,6 +7,7 @@ import { IoArrowBackOutline } from 'react-icons/io5'
 import { FaCheckCircle } from 'react-icons/fa'
 import { MdOutlineErrorOutline } from 'react-icons/md'
 import { FaFemale, FaMale, FaUser } from 'react-icons/fa'
+import { api } from '../services/api'
 
 import banner from '../assets/banner.png'
 
@@ -16,6 +17,69 @@ const AVATAR_CONFIG = {
   male: { Icon: FaMale, bg: '#dbeafe', color: '#3b82f6' },
   female: { Icon: FaFemale, bg: '#fce7f3', color: '#ec4899' },
   'not-set': { Icon: FaUser, bg: '#f1f5f9', color: '#94a3b8' },
+}
+
+const extractUserDetails = (response) => {
+  if (response && typeof response === 'object' && !Array.isArray(response)) {
+    if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+      return response.data
+    }
+
+    return response
+  }
+
+  return null
+}
+
+const formatProfileDate = (value) => {
+  if (!value) {
+    return 'Not available'
+  }
+
+  const parsedDate = new Date(value)
+  if (Number.isNaN(parsedDate.getTime())) {
+    return 'Not available'
+  }
+
+  return parsedDate.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
+const normalizeProfile = (user = {}) => {
+  const firstName = String(user.firstName || '').trim()
+  const lastName = String(user.lastName || '').trim()
+  const fullName = String(user.name || '').trim()
+  const fullNameParts = fullName ? fullName.split(/\s+/) : []
+  const fallbackFirstName = fullNameParts[0] || 'Unknown'
+  const fallbackLastName = fullNameParts.slice(1).join(' ') || 'User'
+  const roles = Array.isArray(user.roles)
+    ? user.roles.map((role) => String(role || '').trim()).filter(Boolean)
+    : []
+  const normalizedGender = String(user.gender || '').toLowerCase()
+  const gender = normalizedGender === 'male' || normalizedGender === 'female' ? normalizedGender : 'not-set'
+  const status = String(user.status || '').toLowerCase()
+  const isAccountVerified = typeof user.isAccountVerified === 'boolean'
+    ? user.isAccountVerified
+    : status === 'active'
+
+  return {
+    firstName: firstName || fallbackFirstName,
+    lastName: lastName || fallbackLastName,
+    position: user.position || roles[0] || 'User',
+    adminId: user.userId || user.id || user.adminId || 'N/A',
+    email: user.email || 'Not available',
+    gender,
+    address: user.address || 'N/A',
+    phoneNumber: user.phoneNumber || 'Not available',
+    unit: user.unit || 'N/A',
+    dateJoined: formatProfileDate(user.createdAt || user.dateJoined || user.dateRegistered),
+    noOfOngoingCases: Number(user.ongoingCases ?? user.noOfOngoingCases ?? 0) || 0,
+    noOfResolvedCases: Number(user.resolvedCases ?? user.noOfResolvedCases ?? 0) || 0,
+    isAccountVerified,
+  }
 }
 
 function ProfileAvatar({ gender }) {
@@ -42,28 +106,49 @@ function ProfileAvatar({ gender }) {
 
 const UserDetails = () => {
   const navigate = useNavigate()
+  const { userId } = useParams()
   const { state } = useLocation()
-  const user = state?.user
+  const [userDetails, setUserDetails] = useState(state?.user || null)
+  const [isLoadingUser, setIsLoadingUser] = useState(Boolean(userId))
   const returnTo = state?.from || '/users'
-  const [firstName = 'Unknown', lastName = 'User'] = (user?.name || '').split(' ')
+  const profile = useMemo(() => normalizeProfile(userDetails || state?.user || {}), [state?.user, userDetails])
 
-  const profile = {
-    firstName,
-    lastName,
-    position: user?.position || 'User',
-    adminId: user?.adminId || 'N/A',
-    email: user?.email || 'Not available',
-    gender: user?.gender || 'not-set',
-    address: user?.address || 'N/A',
-    phoneNumber: user?.phoneNumber || 'Not available',
-    unit: user?.unit || 'N/A',
-    dateJoined: user?.dateRegistered || 'Not available',
-    noOfOngoingCases: user?.ongoingCases ?? 0,
-    noOfResolvedCases: user?.resolvedCases ?? 0,
-    isAccountVerified: Boolean(user?.isAccountVerified),
-  }
+  useEffect(() => {
+    let isActive = true
 
-  if (!user) {
+    const loadUserDetails = async () => {
+      if (!userId) {
+        setIsLoadingUser(false)
+        return
+      }
+
+      setIsLoadingUser(true)
+
+      try {
+        const response = await api.get(`/api/v1/admin/users/${userId}`)
+        const userPayload = extractUserDetails(response)
+
+        if (!isActive) return
+        if (userPayload) {
+          setUserDetails(userPayload)
+        }
+      } catch (error) {
+        if (!isActive) return
+      } finally {
+        if (isActive) {
+          setIsLoadingUser(false)
+        }
+      }
+    }
+
+    loadUserDetails()
+
+    return () => {
+      isActive = false
+    }
+  }, [userId])
+
+  if (!userId && !state?.user) {
     return <Navigate to="/users" replace />
   }
 
@@ -78,6 +163,8 @@ const UserDetails = () => {
           </button>
           <p>User Profile</p>
         </div>
+
+        {isLoadingUser ? <p style={{ margin: '8px 0 0 0' }}>Loading user details...</p> : null}
 
         <div className='pro-file'>
           <div className='banner'>
@@ -104,7 +191,6 @@ const UserDetails = () => {
               </div>
             </div>
             <p className='position'>{profile.position}</p>
-            <p>Admin ID: <span>{profile.adminId}</span></p>
           </div>
 
           <div className='contact-info'>

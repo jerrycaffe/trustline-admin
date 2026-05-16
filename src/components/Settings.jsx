@@ -1,5 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
+import Select from 'react-select'
 import '../css/Settings.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
@@ -8,57 +10,107 @@ import { api } from '../services/api'
 import { IoMdAdd, IoMdClose  } from "react-icons/io";
 import { FiEdit2 } from 'react-icons/fi'
 import { RiDeleteBin6Line } from 'react-icons/ri'
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+import TextAlign from '@tiptap/extension-text-align'
+import Underline from '@tiptap/extension-underline'
+import { TextStyle } from '@tiptap/extension-text-style'
+import Link from '@tiptap/extension-link'
+import {
+  MdFormatBold, MdFormatItalic, MdFormatUnderlined, MdFormatStrikethrough,
+  MdFormatListBulleted, MdFormatListNumbered, MdFormatAlignLeft,
+  MdFormatAlignCenter, MdFormatAlignRight, MdFormatAlignJustify,
+  MdFormatQuote, MdCode, MdUndo, MdRedo, MdLink, MdLinkOff,
+} from 'react-icons/md'
 
-const INITIAL_PERMISSIONS = [
-  'View Reports',
-  'Manage Reports',
-  'Manage Incident Types',
-  'Manage Users',
-  'Manage Chats',
-  'Manage Settings',
-]
+// ─── Rich-text editor ────────────────────────────────────────────────────────
+const RichTextEditor = ({ value, onChange, placeholder }) => {
+  const editor = useEditor({
+    extensions: [
+      StarterKit,
+      Underline,
+      TextStyle,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
+      Link.configure({ openOnClick: false, autolink: true }),
+    ],
+    content: value || '',
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML())
+    },
+  })
 
-const initialRoles = [
-  { id: 1, name: 'Super Admin', permissions: [...INITIAL_PERMISSIONS] },
-  { id: 2, name: 'Case Reviewer', permissions: ['View Reports', 'Manage Reports', 'Manage Chats'] },
-  { id: 3, name: 'Support Admin', permissions: ['Manage Users', 'Manage Chats'] },
-]
+  const setLink = useCallback(() => {
+    if (!editor) return
+    const prev = editor.getAttributes('link').href || ''
+    const url = window.prompt('Enter URL', prev)
+    if (url === null) return
+    if (url === '') {
+      editor.chain().focus().extendMarkRange('link').unsetLink().run()
+      return
+    }
+    editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
+  }, [editor])
 
-const initialAdminUsers = [
-  {
-    id: 1,
-    name: 'Jessica Wang',
-    email: 'jessicawang96@yahoo.com',
-    unit: 'Gender-based Violence Unit',
-    gender: 'Female',
-    dateJoined: '12th August, 2024',
-    status: 'Active',
-    role: 'Super Admin',
-  },
-  {
-    id: 2,
-    name: 'Michael Ade',
-    email: 'michael.ade@trustline.org',
-    unit: 'Case Review Unit',
-    gender: 'Male',
-    dateJoined: '22nd October, 2024',
-    status: 'Active',
-    role: 'Case Reviewer',
-  },
-]
+  if (!editor) return null
 
-const initialActivities = [
-  {
-    id: 1,
-    name: 'Case Follow-up Call',
-    description: 'Call survivor within 24 hours after report assignment.',
-  },
-  {
-    id: 2,
-    name: 'Evidence Verification',
-    description: 'Review submitted files and validate authenticity before escalation.',
-  },
-]
+  const ToolbarBtn = ({ onClick, active, title, children }) => (
+    <button
+      type='button'
+      onMouseDown={(e) => { e.preventDefault(); onClick() }}
+      className={`rte-btn${active ? ' rte-btn-active' : ''}`}
+      title={title}
+    >
+      {children}
+    </button>
+  )
+
+  return (
+    <div className='rte-wrapper'>
+      <div className='rte-toolbar'>
+        <div className='rte-toolbar-group'>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive('bold')} title='Bold'><MdFormatBold size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleItalic().run()} active={editor.isActive('italic')} title='Italic'><MdFormatItalic size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleUnderline().run()} active={editor.isActive('underline')} title='Underline'><MdFormatUnderlined size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleStrike().run()} active={editor.isActive('strike')} title='Strikethrough'><MdFormatStrikethrough size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleCode().run()} active={editor.isActive('code')} title='Inline code'><MdCode size={18} /></ToolbarBtn>
+        </div>
+        <div className='rte-toolbar-separator' />
+        <div className='rte-toolbar-group'>
+          {[1, 2, 3].map((level) => (
+            <ToolbarBtn key={level} onClick={() => editor.chain().focus().toggleHeading({ level }).run()} active={editor.isActive('heading', { level })} title={`Heading ${level}`}>H{level}</ToolbarBtn>
+          ))}
+        </div>
+        <div className='rte-toolbar-separator' />
+        <div className='rte-toolbar-group'>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleBulletList().run()} active={editor.isActive('bulletList')} title='Bullet list'><MdFormatListBulleted size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleOrderedList().run()} active={editor.isActive('orderedList')} title='Ordered list'><MdFormatListNumbered size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().toggleBlockquote().run()} active={editor.isActive('blockquote')} title='Blockquote'><MdFormatQuote size={18} /></ToolbarBtn>
+        </div>
+        <div className='rte-toolbar-separator' />
+        <div className='rte-toolbar-group'>
+          <ToolbarBtn onClick={() => editor.chain().focus().setTextAlign('left').run()} active={editor.isActive({ textAlign: 'left' })} title='Align left'><MdFormatAlignLeft size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().setTextAlign('center').run()} active={editor.isActive({ textAlign: 'center' })} title='Align center'><MdFormatAlignCenter size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().setTextAlign('right').run()} active={editor.isActive({ textAlign: 'right' })} title='Align right'><MdFormatAlignRight size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={editor.isActive({ textAlign: 'justify' })} title='Justify'><MdFormatAlignJustify size={18} /></ToolbarBtn>
+        </div>
+        <div className='rte-toolbar-separator' />
+        <div className='rte-toolbar-group'>
+          <ToolbarBtn onClick={setLink} active={editor.isActive('link')} title='Insert link'><MdLink size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().unsetLink().run()} active={false} title='Remove link'><MdLinkOff size={18} /></ToolbarBtn>
+        </div>
+        <div className='rte-toolbar-separator' />
+        <div className='rte-toolbar-group'>
+          <ToolbarBtn onClick={() => editor.chain().focus().undo().run()} active={false} title='Undo'><MdUndo size={18} /></ToolbarBtn>
+          <ToolbarBtn onClick={() => editor.chain().focus().redo().run()} active={false} title='Redo'><MdRedo size={18} /></ToolbarBtn>
+        </div>
+      </div>
+      <EditorContent editor={editor} className='rte-content' data-placeholder={placeholder || 'Start writing your resource content here…'} />
+    </div>
+  )
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+
 
 const extractIncidentTypeItems = (response) => {
   if (Array.isArray(response)) {
@@ -78,7 +130,9 @@ const isIncidentTypeObject = (value) => {
     'name' in value ||
     'description' in value ||
     'steps' in value ||
-    'createdBy' in value
+    'createdBy' in value ||
+    'unitIds' in value ||
+    'units' in value
   )
 }
 
@@ -100,15 +154,158 @@ const extractCreatedIncidentType = (response) => {
   return candidates.find(isIncidentTypeObject) || null
 }
 
+const extractRoles = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data
+  }
+
+  return []
+}
+
+const normalizeRole = (role) => {
+  if (!role || typeof role !== 'object') {
+    return null
+  }
+
+  return {
+    id: role.id ?? role._id ?? `role-${Date.now()}`,
+    name: role.name ?? 'Unnamed role',
+    permissions: Array.isArray(role.permissions)
+      ? role.permissions
+        .map((permission) => ({
+          id: permission?.id ?? permission?._id ?? '',
+          name: permission?.name ?? '',
+        }))
+        .filter((p) => p.name)
+      : [],
+  }
+}
+
+const normalizePermission = (permission) => {
+  if (!permission || typeof permission !== 'object') {
+    return null
+  }
+
+  return {
+    id: permission.id ?? permission._id ?? '',
+    name: permission.name ?? '',
+    description: permission.description ?? '',
+  }
+}
+
+const extractPermissions = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data
+  }
+
+  return []
+}
+
+const extractResourceItems = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  const candidates = [
+    response?.data?.items,
+    response?.data?.content,
+    response?.data?.results,
+    response?.data?.records,
+    response?.items,
+    response?.content,
+    response?.results,
+    response?.records,
+    response?.data,
+  ]
+
+  return candidates.find(Array.isArray) || []
+}
+
+const extractActivityItems = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  const candidates = [
+    response?.data?.items,
+    response?.data?.content,
+    response?.data?.results,
+    response?.data?.records,
+    response?.items,
+    response?.content,
+    response?.results,
+    response?.records,
+    response?.data,
+  ]
+
+  return candidates.find(Array.isArray) || []
+}
+
+const normalizeResourceItem = (resource) => {
+  if (!resource || typeof resource !== 'object') {
+    return null
+  }
+
+  return {
+    id: resource.id ?? resource.resourceId ?? '',
+    title: resource.title ?? resource.name ?? 'Untitled',
+    incidentTypeId: resource.incidentTypeId ?? resource.incidentType?.id ?? '',
+    incidentTypeName:
+      resource.incidentTypeName ??
+      (typeof resource.incidentType === 'string' ? resource.incidentType : resource.incidentType?.name) ??
+      '—',
+    content: resource.content ?? resource.contents ?? '',
+    fileUrl: resource.fileUrl ?? '',
+    createdBy: resource.createdBy ?? '',
+    createdAt: resource.createdAt ?? null,
+    updatedAt: resource.updatedAt ?? null,
+  }
+}
+
+const normalizeActivity = (activity) => {
+  if (!activity || typeof activity !== 'object') {
+    return null
+  }
+
+  return {
+    id: activity.id ?? activity.activityId ?? '',
+    name: activity.name ?? 'Untitled activity',
+    description: activity.description ?? '',
+    gradeType:
+      typeof activity.gradeType === 'string'
+        ? activity.gradeType
+        : activity.gradeType?.name ?? '—',
+    unit: activity.unit ?? '—',
+    createdById: activity.createdById ?? '',
+    createdByName: activity.createdByName ?? '—',
+    createdAt: activity.createdAt ?? null,
+    updatedAt: activity.updatedAt ?? null,
+  }
+}
+
 const UUID_V4_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 const isUuid = (value) => UUID_V4_REGEX.test(String(value || '').trim())
 
-const normalizeIncidentType = (type, index) => {
+const normalizeIncidentType = (type) => {
   if (!type || typeof type !== 'object') {
     return null
   }
+
+  const rawUnitIds = Array.isArray(type.unitIds)
+    ? type.unitIds
+    : Array.isArray(type.units)
+      ? type.units.map((unit) => (typeof unit === 'object' ? unit?.id ?? unit?._id ?? '' : unit))
+      : []
 
   return {
     id: type.id ?? type._id ?? '',
@@ -116,39 +313,232 @@ const normalizeIncidentType = (type, index) => {
     description: type.description ?? '',
     createdBy: type.createdBy ?? '',
     steps: Number(type.steps ?? 0) || 0,
+    unitIds: rawUnitIds
+      .map((unitId) => String(unitId || '').trim())
+      .filter(Boolean),
   }
 }
 
+const extractUnitItems = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  return Array.isArray(response?.data) ? response.data : []
+}
+
+const isUnitObject = (value) => {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false
+  }
+
+  return 'id' in value || 'name' in value || 'institutionId' in value
+}
+
+const extractCreatedUnit = (response) => {
+  if (isUnitObject(response)) {
+    return response
+  }
+
+  const candidates = [
+    response?.data,
+    response?.result,
+    response?.item,
+    response?.unit,
+    response?.data?.result,
+    response?.data?.item,
+    response?.data?.unit,
+  ]
+
+  return candidates.find(isUnitObject) || null
+}
+
+const normalizeUnit = (unit) => {
+  if (!unit || typeof unit !== 'object') {
+    return null
+  }
+
+  return {
+    id: unit.id ?? unit._id ?? '',
+    name: unit.name ?? 'Unnamed unit',
+    institutionId: unit.institutionId ?? '',
+  }
+}
+
+const normalizeAdminUser = (admin) => {
+  if (!admin || typeof admin !== 'object') {
+    return null
+  }
+
+  const firstName = String(admin.firstName || '').trim()
+  const lastName = String(admin.lastName || '').trim()
+  const email = String(admin.email || '').trim()
+  
+  // Create display name from firstName + lastName or fallback to email
+  let name = ''
+  if (firstName && lastName) {
+    name = `${firstName} ${lastName}`
+  } else if (firstName) {
+    name = firstName
+  } else if (lastName) {
+    name = lastName
+  } else {
+    // Extract from email if no name provided
+    const localPart = email.split('@')[0] || ''
+    name = localPart
+      .split(/[._-]/)
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+      .join(' ') || 'New Admin'
+  }
+
+  // Format joined date
+  const createdAtDate = admin.createdAt ? new Date(admin.createdAt) : new Date()
+  const dateJoined = createdAtDate.toLocaleDateString('en-US', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
+
+  // Map status
+  const statusMapping = {
+    'VERIFIED': 'Active',
+    'UNVERIFIED': 'Unverified',
+    'INVITED': 'Invited',
+    'PENDING': 'Pending',
+  }
+  
+  const status = statusMapping[admin.status] || (admin.status === 'VERIFIED' ? 'Active' : admin.status || 'Unverified')
+  const roles = Array.isArray(admin.roles) ? admin.roles : []
+  const role = roles.length > 0 ? roles[0] : 'Unassigned'
+
+  return {
+    id: admin.userId ?? admin.id ?? '',
+    name: name,
+    email: email,
+    unit: admin.unit || 'Unassigned',
+    gender: admin.gender || 'Not Set',
+    dateJoined: dateJoined,
+    status: status,
+    role: role,
+    phoneNumber: admin.phoneNumber || '',
+    ongoingCases: admin.ongoingCases ?? 0,
+  }
+}
+
+const extractAdminUsers = (response) => {
+  if (Array.isArray(response)) {
+    return response
+  }
+
+  return Array.isArray(response?.data) ? response.data : []
+}
+
+const SETTINGS_SECTION_LABELS = {
+  'incident-types': 'Incident Types',
+  'admin-users': 'Admin Users',
+  units: 'Units',
+  activities: 'Activities',
+  'roles-permissions': 'Roles & Permissions',
+  resources: 'Resources',
+}
+
 const Settings = () => {
-  const [activeTab, setActiveTab] = useState('Incident Types')
+  const location = useLocation()
+  const navigate = useNavigate()
+  const sectionSlug = location.pathname.split('/')[2] || 'incident-types'
+  const activeTab = SETTINGS_SECTION_LABELS[sectionSlug] || 'Incident Types'
+  const isIncidentTypesPage = sectionSlug === 'incident-types' || sectionSlug === 'resources'
+  const isAdminUsersPage = sectionSlug === 'admin-users'
+  const isUnitsPage = sectionSlug === 'incident-types' || sectionSlug === 'units'
+  const isActivitiesPage = sectionSlug === 'activities'
+  const isRolesPermissionsPage = sectionSlug === 'roles-permissions'
+  const isResourcesPage = sectionSlug === 'resources'
+  const isRolesOrAdminUsersPage = isRolesPermissionsPage || isAdminUsersPage
+
+  useEffect(() => {
+    if (!SETTINGS_SECTION_LABELS[sectionSlug]) {
+      navigate('/settings/incident-types', { replace: true })
+    }
+  }, [navigate, sectionSlug])
+
   const [incidentTypes, setIncidentTypes] = useState([])
   const [isLoadingIncidentTypes, setIsLoadingIncidentTypes] = useState(true)
   const [typeName, setTypeName] = useState('')
   const [typeDescription, setTypeDescription] = useState('')
   const [typeSteps, setTypeSteps] = useState(0)
+  const [typeUnitIds, setTypeUnitIds] = useState([])
   const [editingTypeId, setEditingTypeId] = useState(null)
   const [isCreatingIncidentType, setIsCreatingIncidentType] = useState(false)
   const [isUpdatingIncidentType, setIsUpdatingIncidentType] = useState(false)
   const [isDeletingIncidentTypeId, setIsDeletingIncidentTypeId] = useState(null)
-  const [roles, setRoles] = useState(initialRoles)
-  const [adminUsers, setAdminUsers] = useState(initialAdminUsers)
+  const [roles, setRoles] = useState([])
+  const [adminUsers, setAdminUsers] = useState([])
   const [inviteEmail, setInviteEmail] = useState('')
-  const [inviteRole, setInviteRole] = useState(initialRoles[1]?.name || initialRoles[0]?.name || '')
+  const [inviteRole, setInviteRole] = useState('')
+  const [inviteUnitId, setInviteUnitId] = useState('')
+  const [isInvitingAdmin, setIsInvitingAdmin] = useState(false)
   const [editingRoleId, setEditingRoleId] = useState(null)
   const [roleName, setRoleName] = useState('')
-  const [permissionRoleId, setPermissionRoleId] = useState(initialRoles[0]?.id || '')
-  const [permissionDraft, setPermissionDraft] = useState(initialRoles[0]?.permissions || [])
-  const [permissions, setPermissions] = useState([...INITIAL_PERMISSIONS])
+  const [roleDescription, setRoleDescription] = useState('')
+  const [isCreatingRole, setIsCreatingRole] = useState(false)
+  const [isSavingRolePermissions, setIsSavingRolePermissions] = useState(false)
+  const [permissionRoleId, setPermissionRoleId] = useState('')
+  const [permissionDraft, setPermissionDraft] = useState([])
+  const [permissions, setPermissions] = useState([])
   const [newPermissionName, setNewPermissionName] = useState('')
+  const [newPermissionDescription, setNewPermissionDescription] = useState('')
+  const [isCreatingPermission, setIsCreatingPermission] = useState(false)
   const [selectedPermissionToAdd, setSelectedPermissionToAdd] = useState('')
-  const [activities, setActivities] = useState(initialActivities)
+  const [activities, setActivities] = useState([])
+  const [isLoadingActivities, setIsLoadingActivities] = useState(true)
   const [activityName, setActivityName] = useState('')
   const [activityDescription, setActivityDescription] = useState('')
+  const [activityGradeType, setActivityGradeType] = useState('PERCENTAGE')
   const [editingActivityId, setEditingActivityId] = useState(null)
+  const [isCreatingActivity, setIsCreatingActivity] = useState(false)
+  const [isUpdatingActivity, setIsUpdatingActivity] = useState(false)
+  const [isDeletingActivityId, setIsDeletingActivityId] = useState(null)
+  const [units, setUnits] = useState([])
+  const [isLoadingUnits, setIsLoadingUnits] = useState(true)
+  const [unitName, setUnitName] = useState('')
+  const [editingUnitId, setEditingUnitId] = useState(null)
+  const unitNameInputRef = useRef(null)
+  const [isCreatingUnit, setIsCreatingUnit] = useState(false)
+  const [isUpdatingUnit, setIsUpdatingUnit] = useState(false)
+  const [isDeletingUnitId, setIsDeletingUnitId] = useState(null)
+
+  // Resources
+  const [resources, setResources] = useState([])
+  const [isLoadingResources, setIsLoadingResources] = useState(true)
+  const [resourceTitle, setResourceTitle] = useState('')
+  const [resourceIncidentTypeId, setResourceIncidentTypeId] = useState('')
+  const [resourceContent, setResourceContent] = useState('')
+  const [isPostingResource, setIsPostingResource] = useState(false)
+  const [isDeletingResourceId, setIsDeletingResourceId] = useState(null)
 
   const availableRoleNames = roles.map((role) => role.name)
+  const availableUnits = units
+    .map((unit) => ({
+      id: String(unit?.id || '').trim(),
+      name: String(unit?.name || 'Unnamed unit'),
+    }))
+    .filter((unit) => unit.id)
+  const incidentTypeUnitOptions = units
+    .map((unit) => ({
+      value: String(unit?.id || '').trim(),
+      label: String(unit?.name || 'Unnamed unit'),
+    }))
+    .filter((option) => option.value)
+  const selectedIncidentTypeUnitOptions = incidentTypeUnitOptions.filter((option) =>
+    typeUnitIds.includes(option.value),
+  )
 
   useEffect(() => {
+    if (!isIncidentTypesPage) {
+      return
+    }
+
     let isActive = true
 
     const loadIncidentTypes = async () => {
@@ -180,11 +570,209 @@ const Settings = () => {
     return () => {
       isActive = false
     }
-  }, [])
+  }, [isIncidentTypesPage])
 
-  const toastLoading = (message) => {
-    return toast.loading(message)
-  }
+  useEffect(() => {
+    if (!isActivitiesPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadActivities = async () => {
+      setIsLoadingActivities(true)
+
+      try {
+        const response = await api.get('/api/v1/admin/activities')
+        const items = extractActivityItems(response)
+          .map(normalizeActivity)
+          .filter(Boolean)
+
+        if (!isActive) return
+
+        setActivities(items)
+      } catch (error) {
+        if (!isActive) return
+
+        setActivities([])
+        toast.error(error.message || 'Unable to load activities.')
+      } finally {
+        if (isActive) {
+          setIsLoadingActivities(false)
+        }
+      }
+    }
+
+    loadActivities()
+
+    return () => {
+      isActive = false
+    }
+  }, [isActivitiesPage])
+
+  useEffect(() => {
+    if (!isUnitsPage && !isAdminUsersPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadUnits = async () => {
+      setIsLoadingUnits(true)
+
+      try {
+        const response = await api.get('/api/v1/units')
+        const items = extractUnitItems(response)
+          .map(normalizeUnit)
+          .filter(Boolean)
+
+        if (!isActive) return
+        setUnits(items)
+        setInviteUnitId((prev) => prev || String(items[0]?.id || '').trim())
+      } catch (error) {
+        if (!isActive) return
+        setUnits([])
+        setInviteUnitId('')
+        toast.error(error.message || 'Unable to load units.')
+      } finally {
+        if (isActive) {
+          setIsLoadingUnits(false)
+        }
+      }
+    }
+
+    loadUnits()
+
+    return () => {
+      isActive = false
+    }
+  }, [isUnitsPage, isAdminUsersPage])
+
+  useEffect(() => {
+    if (!isRolesOrAdminUsersPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadRoles = async () => {
+      try {
+        const response = await api.get('/api/v1/admin/roles')
+        const normalizedRoles = extractRoles(response)
+          .map(normalizeRole)
+          .filter(Boolean)
+
+        if (!isActive || normalizedRoles.length === 0) return
+
+        const firstRole = normalizedRoles[0]
+
+        setRoles(normalizedRoles)
+        setPermissionRoleId(String(firstRole.id))
+        setPermissionDraft(firstRole.permissions)
+        setInviteRole(firstRole.name || '')
+      } catch (error) {
+        if (!isActive) return
+        toast.error(error.message || 'Unable to load roles.')
+      }
+    }
+
+    loadRoles()
+
+    return () => {
+      isActive = false
+    }
+  }, [isRolesOrAdminUsersPage])
+
+  useEffect(() => {
+    if (!isRolesPermissionsPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadPermissions = async () => {
+      try {
+        const response = await api.get('/api/v1/admin/permissions')
+        const items = extractPermissions(response)
+          .map(normalizePermission)
+          .filter((permission) => permission?.name)
+
+        if (!isActive) return
+
+        setPermissions(items)
+      } catch (error) {
+        if (!isActive) return
+        toast.error(error.message || 'Unable to load permissions.')
+      }
+    }
+
+    loadPermissions()
+
+    return () => {
+      isActive = false
+    }
+  }, [isRolesPermissionsPage])
+
+  useEffect(() => {
+    if (!isResourcesPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadResources = async () => {
+      setIsLoadingResources(true)
+      try {
+        const response = await api.get('/api/v1/resources?offset=0&limit=20')
+        const items = extractResourceItems(response)
+          .map(normalizeResourceItem)
+          .filter(Boolean)
+        if (!isActive) return
+        setResources(items)
+      } catch {
+        if (!isActive) return
+        setResources([])
+      } finally {
+        if (isActive) setIsLoadingResources(false)
+      }
+    }
+
+    loadResources()
+
+    return () => { isActive = false }
+  }, [isResourcesPage])
+
+  useEffect(() => {
+    if (!isAdminUsersPage) {
+      return
+    }
+
+    let isActive = true
+
+    const loadAdminUsers = async () => {
+      try {
+        const response = await api.get('/api/v1/admin/admins')
+        const items = extractAdminUsers(response)
+          .map((admin) => normalizeAdminUser(admin))
+          .filter(Boolean)
+
+        if (!isActive) return
+
+        setAdminUsers(items)
+      } catch (error) {
+        if (!isActive) return
+
+        setAdminUsers([])
+        toast.error(error.message || 'Unable to load admin users.')
+      }
+    }
+
+    loadAdminUsers()
+
+    return () => {
+      isActive = false
+    }
+  }, [isAdminUsersPage])
 
   const toastSuccess = (message, toastId = null) => {
     if (toastId) {
@@ -206,7 +794,18 @@ const Settings = () => {
     setTypeName('')
     setTypeDescription('')
     setTypeSteps(0)
+    setTypeUnitIds([])
     setEditingTypeId(null)
+  }
+
+  const handleIncidentTypeUnitsChange = (selectedOptions) => {
+    const selectedIds = Array.isArray(selectedOptions)
+      ? selectedOptions
+        .map((option) => String(option?.value || '').trim())
+        .filter(Boolean)
+      : []
+
+    setTypeUnitIds(selectedIds)
   }
 
   const handleSaveIncidentType = async (event) => {
@@ -215,7 +814,14 @@ const Settings = () => {
     const name = typeName.trim()
     const description = typeDescription.trim()
     const normalizedSteps = Math.max(0, Number(typeSteps) || 0)
+    const normalizedUnitIds = Array.from(
+      new Set(typeUnitIds.map((unitId) => String(unitId || '').trim()).filter(Boolean)),
+    )
     if (!name || !description) return
+    if (normalizedUnitIds.length === 0) {
+      toastError('Select at least one unit for this incident type.')
+      return
+    }
 
     if (editingTypeId) {
       if (!isUuid(editingTypeId)) {
@@ -232,6 +838,7 @@ const Settings = () => {
             name,
             description,
             steps: normalizedSteps,
+            unitIds: normalizedUnitIds,
           },
           { auth: true },
         )
@@ -241,6 +848,7 @@ const Settings = () => {
           name,
           description,
           steps: normalizedSteps,
+          unitIds: normalizedUnitIds,
         }
 
         const updatedType = normalizeIncidentType(updatedPayload, incidentTypes.length)
@@ -268,6 +876,7 @@ const Settings = () => {
           name,
           description,
           steps: normalizedSteps,
+          unitIds: normalizedUnitIds,
         },
         { auth: true },
       )
@@ -276,6 +885,7 @@ const Settings = () => {
         name,
         description,
         steps: normalizedSteps,
+        unitIds: normalizedUnitIds,
       }
 
       const createdType = normalizeIncidentType(createdPayload, incidentTypes.length)
@@ -296,6 +906,11 @@ const Settings = () => {
     setTypeName(type.name)
     setTypeDescription(type.description)
     setTypeSteps(type.steps ?? 0)
+    setTypeUnitIds(
+      Array.isArray(type.unitIds)
+        ? type.unitIds.map((unitId) => String(unitId || '').trim()).filter(Boolean)
+        : [],
+    )
   }
 
   const handleDeleteIncidentType = async (typeId) => {
@@ -324,6 +939,113 @@ const Settings = () => {
     }
   }
 
+  const clearUnitForm = () => {
+    setUnitName('')
+    setEditingUnitId(null)
+  }
+
+  const handleSaveUnit = async (event) => {
+    event.preventDefault()
+
+    const name = unitName.trim()
+    if (!name) return
+
+    if (editingUnitId) {
+      if (!isUuid(editingUnitId)) {
+        toastError('Invalid unit id. Please refresh and try again.')
+        return
+      }
+
+      setIsUpdatingUnit(true)
+
+      try {
+        const response = await api.put(
+          `/api/v1/units/${editingUnitId}`,
+          { name },
+          { auth: true },
+        )
+
+        const updatedPayload = extractCreatedUnit(response) || {
+          id: editingUnitId,
+          name,
+        }
+
+        const updatedUnit = normalizeUnit(updatedPayload)
+        if (updatedUnit) {
+          setUnits((prev) => prev.map((unit) => (unit.id === editingUnitId ? updatedUnit : unit)))
+        }
+
+        clearUnitForm()
+        toastSuccess('Unit updated successfully!')
+      } catch (error) {
+        toastError(error.message || 'Unable to update unit.')
+      } finally {
+        setIsUpdatingUnit(false)
+      }
+      return
+    }
+
+    setIsCreatingUnit(true)
+
+    try {
+      const response = await api.post(
+        '/api/v1/units',
+        { name },
+        { auth: true },
+      )
+
+      const createdPayload = extractCreatedUnit(response) || { name }
+      const createdUnit = normalizeUnit(createdPayload)
+
+      if (createdUnit) {
+        setUnits((prev) => [createdUnit, ...prev])
+        setInviteUnitId((prev) => prev || String(createdUnit.id || '').trim())
+      }
+
+      clearUnitForm()
+      toastSuccess('Unit created successfully!')
+    } catch (error) {
+      toastError(error.message || 'Unable to create unit.')
+    } finally {
+      setIsCreatingUnit(false)
+    }
+  }
+
+  const handleEditUnit = (unit) => {
+    setEditingUnitId(unit.id)
+    setUnitName(unit.name)
+    setTimeout(() => unitNameInputRef.current?.focus(), 0)
+  }
+
+  const handleDeleteUnit = async (unitId) => {
+    if (!unitId || typeof unitId !== 'string' || !unitId.includes('-')) {
+      toastError('Invalid unit ID. Cannot delete.')
+      return
+    }
+
+    setIsDeletingUnitId(unitId)
+
+    try {
+      await api.delete(`/api/v1/units/${unitId}`, { auth: true })
+      setUnits((prev) => prev.filter((unit) => unit.id !== unitId))
+
+      if (inviteUnitId === unitId) {
+        const remainingUnits = units.filter((unit) => unit.id !== unitId)
+        setInviteUnitId(String(remainingUnits[0]?.id || '').trim())
+      }
+
+      if (editingUnitId === unitId) {
+        clearUnitForm()
+      }
+
+      toastSuccess('Unit deleted successfully!')
+    } catch (error) {
+      toastError(error.message || 'Unable to delete unit.')
+    } finally {
+      setIsDeletingUnitId(null)
+    }
+  }
+
   const toDisplayName = (email) => {
     const localPart = (email || '').split('@')[0] || ''
     return localPart
@@ -341,61 +1063,136 @@ const Settings = () => {
     })
   }
 
-  const handleInviteAdmin = (event) => {
+  const handleInviteAdmin = async (event) => {
     event.preventDefault()
     const email = inviteEmail.trim().toLowerCase()
-    if (!email || !inviteRole) return
+    const selectedInviteUnitId = String(inviteUnitId || '').trim()
+    if (!email || !inviteRole || !selectedInviteUnitId) return
 
-    const nextId = adminUsers.length > 0 ? Math.max(...adminUsers.map((admin) => admin.id)) + 1 : 1
-    const invitedAdmin = {
-      id: nextId,
-      name: toDisplayName(email),
-      email,
-      unit: 'Unassigned',
-      gender: 'Not Set',
-      dateJoined: formatJoinedDate(new Date()),
-      status: 'Invited',
-      role: inviteRole,
+    const selectedInviteUnit = availableUnits.find((unit) => unit.id === selectedInviteUnitId)
+
+    setIsInvitingAdmin(true)
+    const loadingToastId = toast.loading('Sending admin invite...')
+
+    try {
+      const response = await api.post(
+        '/api/v1/admin/invite',
+        {
+          email,
+          role: inviteRole,
+          unitId: selectedInviteUnitId,
+        },
+        { auth: true },
+      )
+
+      const payload = response?.data && typeof response.data === 'object'
+        ? response.data
+        : response
+
+      const userId = payload?.userId || payload?.id || payload?._id
+      const invitedAdmin = {
+        id: userId || `${email}-${Date.now()}`,
+        name: toDisplayName(payload?.email || email),
+        email: payload?.email || email,
+        unit: payload?.unitName || payload?.unit || selectedInviteUnit?.name || 'Unassigned',
+        gender: 'Not Set',
+        dateJoined: formatJoinedDate(new Date()),
+        status: 'Invited',
+        role: payload?.role || inviteRole,
+      }
+
+      setAdminUsers((prev) => {
+        const withoutDuplicate = prev.filter(
+          (admin) => admin.email.toLowerCase() !== invitedAdmin.email.toLowerCase(),
+        )
+        return [...withoutDuplicate, invitedAdmin]
+      })
+      setInviteEmail('')
+      toast.success('Invite sent successfully. Admin will receive an email shortly.', { id: loadingToastId })
+    } catch (error) {
+      toast.error(error.message || 'Unable to send admin invite right now.', { id: loadingToastId })
+    } finally {
+      setIsInvitingAdmin(false)
     }
-
-    setAdminUsers((prev) => [...prev, invitedAdmin])
-    setInviteEmail('')
   }
 
   const clearRoleForm = () => {
     setEditingRoleId(null)
     setRoleName('')
+    setRoleDescription('')
   }
 
-  const handleCreatePermission = (event) => {
+  const handleCreatePermission = async (event) => {
     event.preventDefault()
     const name = newPermissionName.trim()
-    if (!name || permissions.includes(name)) return
-    setPermissions((prev) => [...prev, name])
-    setNewPermissionName('')
+    const description = newPermissionDescription.trim()
+    if (!name || permissions.some((permission) => permission.name.toLowerCase() === name.toLowerCase())) return
+
+    setIsCreatingPermission(true)
+    const loadingToastId = toast.loading('Creating permission...')
+
+    try {
+      const response = await api.post(
+        '/api/v1/admin/permissions',
+        { name, description },
+        { auth: true },
+      )
+
+      const createdPayload = response?.data && typeof response.data === 'object'
+        ? response.data
+        : response
+      const createdPermission = normalizePermission(createdPayload) || {
+        id: '',
+        name,
+        description,
+      }
+
+      setPermissions((prev) =>
+        prev.some((permission) => permission.name.toLowerCase() === createdPermission.name.toLowerCase())
+          ? prev
+          : [...prev, createdPermission]
+      )
+      setNewPermissionName('')
+      setNewPermissionDescription('')
+      toast.success('Permission created successfully!', { id: loadingToastId })
+    } catch (error) {
+      toast.error(error.message || 'Unable to create permission.', { id: loadingToastId })
+    } finally {
+      setIsCreatingPermission(false)
+    }
   }
 
-  const handleDeletePermission = (permission) => {
-    setPermissions((prev) => prev.filter((p) => p !== permission))
+  const handleDeletePermission = (permissionId) => {
+    setPermissions((prev) => prev.filter((p) => p.id !== permissionId))
     setRoles((prev) =>
-      prev.map((role) => ({ ...role, permissions: role.permissions.filter((p) => p !== permission) }))
+      prev.map((role) => ({ ...role, permissions: role.permissions.filter((p) => p?.id !== permissionId) }))
     )
-    setPermissionDraft((prev) => prev.filter((p) => p !== permission))
+    setPermissionDraft((prev) => prev.filter((p) => p?.id !== permissionId))
   }
 
   const handleAddPermissionToRole = () => {
-    if (!selectedPermissionToAdd || permissionDraft.includes(selectedPermissionToAdd)) return
-    setPermissionDraft((prev) => [...prev, selectedPermissionToAdd])
+    if (!selectedPermissionToAdd) return
+
+    const selectedPerm = permissions.find((p) => p.name === selectedPermissionToAdd)
+    if (!selectedPerm) return
+
+    const alreadyExists = permissionDraft.some(
+      (p) => String(p?.id || '').toLowerCase() === String(selectedPerm.id).toLowerCase()
+    )
+    if (alreadyExists) return
+
+    setPermissionDraft((prev) => [...prev, { id: selectedPerm.id, name: selectedPerm.name }])
     setSelectedPermissionToAdd('')
   }
 
-  const handleRemovePermissionFromDraft = (permission) => {
-    setPermissionDraft((prev) => prev.filter((p) => p !== permission))
+  const handleRemovePermissionFromDraft = (permissionId) => {
+    setPermissionDraft((prev) => prev.filter((p) => p?.id !== permissionId))
   }
 
-  const handleSaveRole = (event) => {
+  const handleSaveRole = async (event) => {
     event.preventDefault()
     const normalizedName = roleName.trim()
+    const normalizedDescription = roleDescription.trim()
     if (!normalizedName) return
 
     const duplicateRole = roles.find(
@@ -426,19 +1223,45 @@ const Settings = () => {
       return
     }
 
-    const nextId = roles.length > 0 ? Math.max(...roles.map((role) => role.id)) + 1 : 1
-    setRoles((prev) => [...prev, { id: nextId, name: normalizedName, permissions: [] }])
-    setPermissionRoleId(nextId)
-    setPermissionDraft([])
-    if (!inviteRole) {
-      setInviteRole(normalizedName)
+    setIsCreatingRole(true)
+    const loadingToastId = toast.loading('Creating role...')
+
+    try {
+      const response = await api.post(
+        '/api/v1/admin/roles',
+        {
+          name: normalizedName,
+          description: normalizedDescription,
+        },
+        { auth: true },
+      )
+
+      const createdPayload = response?.data && typeof response.data === 'object'
+        ? response.data
+        : response
+
+      const createdRole = normalizeRole(createdPayload)
+      if (createdRole) {
+        setRoles((prev) => [...prev, createdRole])
+        setPermissionRoleId(String(createdRole.id))
+        setPermissionDraft(createdRole.permissions)
+        if (!inviteRole) {
+          setInviteRole(createdRole.name)
+        }
+      }
+      clearRoleForm()
+      toast.success('Role created successfully! 🎭', { id: loadingToastId })
+    } catch (error) {
+      toast.error(error.message || 'Unable to create role.', { id: loadingToastId })
+    } finally {
+      setIsCreatingRole(false)
     }
-    clearRoleForm()
   }
 
   const handleEditRole = (role) => {
     setEditingRoleId(role.id)
     setRoleName(role.name)
+    setRoleDescription(role.description || '')
   }
 
   const handlePermissionRoleChange = (roleIdValue) => {
@@ -448,21 +1271,52 @@ const Settings = () => {
       return
     }
 
-    const normalizedRoleId = Number(roleIdValue)
-    const selectedRole = roles.find((role) => role.id === normalizedRoleId)
-    setPermissionRoleId(normalizedRoleId)
+    const selectedRole = roles.find((role) => String(role.id) === String(roleIdValue))
+    setPermissionRoleId(String(roleIdValue))
     setPermissionDraft(selectedRole?.permissions || [])
   }
 
-  const handleSaveRolePermissions = (event) => {
+  const handleSaveRolePermissions = async (event) => {
     event.preventDefault()
     if (!permissionRoleId) return
 
-    setRoles((prev) =>
-      prev.map((role) =>
-        role.id === Number(permissionRoleId) ? { ...role, permissions: permissionDraft } : role
+    const permissionIds = permissionDraft
+      .map((perm) => perm?.id)
+      .filter((id) => id && String(id).trim().length > 0)
+
+    console.log('Permission Draft:', permissionDraft)
+    console.log('Extracted Permission IDs:', permissionIds)
+
+    setIsSavingRolePermissions(true)
+    const loadingToastId = toast.loading('Saving role permissions...')
+
+    try {
+      const response = await api.post(
+        `/api/v1/admin/roles/${permissionRoleId}/permissions`,
+        { permissionIds },
+        { auth: true },
       )
-    )
+
+      const updatedPayload = response?.data && typeof response.data === 'object'
+        ? response.data
+        : response
+      const updatedRole = normalizeRole(updatedPayload)
+
+      if (updatedRole) {
+        setRoles((prev) =>
+          prev.map((role) =>
+            String(role.id) === String(permissionRoleId) ? updatedRole : role,
+          ),
+        )
+        setPermissionDraft(updatedRole.permissions)
+      }
+
+      toast.success('Permissions assigned successfully!', { id: loadingToastId })
+    } catch (error) {
+      toast.error(error.message || 'Unable to assign permissions to role.', { id: loadingToastId })
+    } finally {
+      setIsSavingRolePermissions(false)
+    }
   }
 
   const handleOpenPermissionEditor = (roleId) => {
@@ -491,58 +1345,224 @@ const Settings = () => {
       clearRoleForm()
     }
 
-    if (Number(permissionRoleId) === roleId) {
+    if (String(permissionRoleId) === String(roleId)) {
       const fallbackRole = nextRoles[0]
-      setPermissionRoleId(fallbackRole?.id || '')
+      setPermissionRoleId(fallbackRole?.id ? String(fallbackRole.id) : '')
       setPermissionDraft(fallbackRole?.permissions || [])
     }
   }
 
-  const handleAdminRoleChange = (adminId, nextRole) => {
+  const handleAdminRoleChange = async (adminId, nextRole) => {
+    // Find the role ID from the roles list
+    const selectedRole = roles.find((role) => role.name === nextRole)
+    const roleId = selectedRole?.id
+
+    if (!roleId || !adminId) {
+      toastError('Unable to assign role. Missing role or admin information.')
+      return
+    }
+
+    // Store current admin state for rollback
+    const currentAdmin = adminUsers.find((admin) => admin.id === adminId)
+    const previousRole = currentAdmin?.role || 'Unassigned'
+
+    // Optimistically update the UI
     setAdminUsers((prev) =>
       prev.map((admin) => (admin.id === adminId ? { ...admin, role: nextRole || 'Unassigned' } : admin))
     )
+
+    try {
+      await api.put(
+        '/api/v1/admin/users/roles/assign',
+        {
+          userId: adminId,
+          roleId: roleId,
+        },
+        { auth: true }
+      )
+
+      toastSuccess('Role assigned successfully!')
+    } catch (error) {
+      // Rollback on error
+      setAdminUsers((prev) =>
+        prev.map((admin) => (admin.id === adminId ? { ...admin, role: previousRole } : admin))
+      )
+      toastError(error.message || 'Unable to assign role.')
+    }
+  }
+
+  const clearResourceForm = () => {
+    setResourceTitle('')
+    setResourceIncidentTypeId('')
+    setResourceContent('')
+  }
+
+  const handlePostResource = async (event) => {
+    event.preventDefault()
+    const title = resourceTitle.trim()
+    const content = resourceContent.trim()
+    if (!title || !resourceIncidentTypeId || !content || content === '<p></p>') {
+      toastError('Please fill in title, incident type, and content.')
+      return
+    }
+
+    setIsPostingResource(true)
+    const loadingToastId = toast.loading('Publishing resource…')
+
+    try {
+      // Build FormData for multipart resource creation.
+      // The 'resource' part must have Content-Type: application/json for Spring's @RequestPart.
+      const formData = new FormData()
+      const resourceJson = JSON.stringify({ name: title, incidentTypeId: resourceIncidentTypeId, contents: content })
+      const resourceBlob = new Blob([resourceJson], { type: 'application/json' })
+      formData.append('resource', resourceBlob)
+      
+      const response = await api.post(
+        '/api/v1/resources',
+        formData,
+        { auth: true },
+      )
+      const created = normalizeResourceItem(response?.data || response)
+      if (created) {
+        setResources((prev) => [created, ...prev])
+      }
+      clearResourceForm()
+      toast.success('Resource published successfully!', { id: loadingToastId })
+    } catch (error) {
+      toast.error(error.message || 'Unable to publish resource.', { id: loadingToastId })
+    } finally {
+      setIsPostingResource(false)
+    }
+  }
+
+  const handleDeleteResource = async (resourceId) => {
+    if (!resourceId) return
+    setIsDeletingResourceId(resourceId)
+    try {
+      await api.delete(`/api/v1/resources/${resourceId}`, { auth: true })
+      setResources((prev) => prev.filter((r) => r.id !== resourceId && r.resourceId !== resourceId))
+      toastSuccess('Resource deleted.')
+    } catch (error) {
+      toastError(error.message || 'Unable to delete resource.')
+    } finally {
+      setIsDeletingResourceId(null)
+    }
   }
 
   const clearActivityForm = () => {
     setActivityName('')
     setActivityDescription('')
+    setActivityGradeType('PERCENTAGE')
     setEditingActivityId(null)
+    setIsUpdatingActivity(false)
   }
 
-  const handleSaveActivity = (event) => {
+  const handleSaveActivity = async (event) => {
     event.preventDefault()
 
     const name = activityName.trim()
     const description = activityDescription.trim()
-    if (!name || !description) return
+    const gradeType = String(activityGradeType || '').trim()
+    if (!name || !description || !gradeType) return
 
     if (editingActivityId) {
-      setActivities((prev) =>
-        prev.map((activity) =>
-          activity.id === editingActivityId ? { ...activity, name, description } : activity
+      setIsUpdatingActivity(true)
+
+      try {
+        const response = await api.put(
+          `/api/v1/admin/activities/${editingActivityId}`,
+          {
+            name,
+            description,
+            gradeType,
+          },
+          { auth: true },
         )
-      )
-      clearActivityForm()
+
+        const updatedActivity = normalizeActivity(response?.data || response) || {
+          id: editingActivityId,
+          name,
+          description,
+          gradeType,
+          unit: '—',
+          createdById: '',
+          createdByName: '—',
+          createdAt: null,
+          updatedAt: null,
+        }
+
+        setActivities((prev) =>
+          prev.map((activity) =>
+            activity.id === editingActivityId ? { ...activity, ...updatedActivity } : activity,
+          ),
+        )
+        clearActivityForm()
+        toastSuccess('Activity updated successfully!')
+      } catch (error) {
+        toastError(error.message || 'Unable to update activity.')
+      } finally {
+        setIsUpdatingActivity(false)
+      }
+
       return
     }
 
-    const nextId = activities.length > 0 ? Math.max(...activities.map((activity) => activity.id)) + 1 : 1
-    setActivities((prev) => [...prev, { id: nextId, name, description }])
-    clearActivityForm()
+    setIsCreatingActivity(true)
+
+    try {
+      const response = await api.post(
+        '/api/v1/admin/activities',
+        {
+          name,
+          description,
+          gradeType,
+        },
+        { auth: true },
+      )
+
+      const createdActivity = normalizeActivity(response?.data || response) || {
+        id: String(Date.now()),
+        name,
+        description,
+        gradeType,
+      }
+
+      setActivities((prev) => [createdActivity, ...prev])
+      clearActivityForm()
+      toastSuccess('Activity created successfully!')
+    } catch (error) {
+      toastError(error.message || 'Unable to create activity.')
+    } finally {
+      setIsCreatingActivity(false)
+    }
   }
 
   const handleEditActivity = (activity) => {
     setEditingActivityId(activity.id)
     setActivityName(activity.name)
     setActivityDescription(activity.description)
+    setActivityGradeType(activity.gradeType || 'PERCENTAGE')
   }
 
   const handleDeleteActivity = (activityId) => {
-    setActivities((prev) => prev.filter((activity) => activity.id !== activityId))
-    if (editingActivityId === activityId) {
-      clearActivityForm()
-    }
+    if (!activityId) return
+
+    setIsDeletingActivityId(activityId)
+
+    api.delete(`/api/v1/admin/activities/${activityId}`, { auth: true })
+      .then(() => {
+        setActivities((prev) => prev.filter((activity) => activity.id !== activityId))
+        if (editingActivityId === activityId) {
+          clearActivityForm()
+        }
+        toastSuccess('Activity deleted successfully!')
+      })
+      .catch((error) => {
+        toastError(error.message || 'Unable to delete activity.')
+      })
+      .finally(() => {
+        setIsDeletingActivityId(null)
+      })
   }
 
   return (
@@ -555,26 +1575,37 @@ const Settings = () => {
         {/* Navigation */}
         <div className='navigation'>
           <button 
+            type='button'
             className={activeTab === 'Incident Types' ? 'active' : ''}
-            onClick={() => setActiveTab('Incident Types')}
+            onClick={() => navigate('/settings/incident-types')}
           >
             Incident Types
           </button>
           <button 
+            type='button'
             className={activeTab === 'Admin Users' ? 'active' : ''}
-            onClick={() => setActiveTab('Admin Users')}
+            onClick={() => navigate('/settings/admin-users')}
           >
             Admin Users
           </button>
           <button
+            type='button'
+            className={activeTab === 'Units' ? 'active' : ''}
+            onClick={() => navigate('/settings/units')}
+          >
+            Units
+          </button>
+          <button
+            type='button'
             className={activeTab === 'Activities' ? 'active' : ''}
-            onClick={() => setActiveTab('Activities')}
+            onClick={() => navigate('/settings/activities')}
           >
             Activities
           </button>
           <button
+            type='button'
             className={activeTab === 'Roles & Permissions' ? 'active' : ''}
-            onClick={() => setActiveTab('Roles & Permissions')}
+            onClick={() => navigate('/settings/roles-permissions')}
           >
             Roles & Permissions
           </button>
@@ -622,6 +1653,38 @@ const Settings = () => {
                   required
                 />
               </label>
+
+              <div className='incident-type-unit-picker'>
+                <div className='incident-type-unit-picker-head'>
+                  <span>Units that will attend to this incident type</span>
+                  <strong>{typeUnitIds.length} selected</strong>
+                </div>
+
+                {isLoadingUnits ? (
+                  <p className='incident-type-unit-picker-hint'>Loading units...</p>
+                ) : null}
+
+                {!isLoadingUnits && units.length === 0 ? (
+                  <p className='incident-type-unit-picker-hint'>No units available. Create units first.</p>
+                ) : null}
+
+                {!isLoadingUnits && units.length > 0 ? (
+                  <>
+                    <Select
+                      isMulti
+                      closeMenuOnSelect={false}
+                      options={incidentTypeUnitOptions}
+                      value={selectedIncidentTypeUnitOptions}
+                      onChange={handleIncidentTypeUnitsChange}
+                      isLoading={isLoadingUnits}
+                      className='incident-type-unit-react-select'
+                      classNamePrefix='incident-type-unit-select'
+                      placeholder='Select one or more units'
+                      noOptionsMessage={() => 'No units found'}
+                    />
+                  </>
+                ) : null}
+              </div>
 
               <div className='incident-type-form-actions'>
                 {editingTypeId ? (
@@ -720,8 +1783,27 @@ const Settings = () => {
                   </select>
                 </label>
 
-                <button type='submit' className='admin-primary-btn'>
-                  <IoMdAdd /> Invite Admin
+                <label>
+                  <span>Unit</span>
+                  <select
+                    value={inviteUnitId}
+                    onChange={(event) => setInviteUnitId(event.target.value)}
+                    required
+                    disabled={isLoadingUnits || availableUnits.length === 0}
+                  >
+                    <option value='' disabled>Select unit</option>
+                    {availableUnits.map((unit) => (
+                      <option key={unit.id} value={unit.id}>{unit.name}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <button
+                  type='submit'
+                  className='admin-primary-btn invite-admin-submit'
+                  disabled={isInvitingAdmin || isLoadingUnits || availableUnits.length === 0}
+                >
+                  {isInvitingAdmin ? 'Inviting...' : <><IoMdAdd /> Invite Admin</>}
                 </button>
               </form>
             </section>
@@ -732,7 +1814,7 @@ const Settings = () => {
                 <table className='admin-list-table'>
                   <thead>
                     <tr>
-                      <th>Admin Name</th>
+                      <th>Name</th>
                       <th>Unit</th>
                       <th>Gender</th>
                       <th>Date Joined</th>
@@ -778,6 +1860,96 @@ const Settings = () => {
           </div>
         )}
 
+        {activeTab === 'Units' && (
+          <div className='units'>
+            <div className='incident-types-head'>
+              <p>Units</p>
+              <span>Create, update, list, and delete units in your institution.</span>
+            </div>
+
+            <form className='incident-type-form' onSubmit={handleSaveUnit}>
+              <label>
+                <span>Unit Name</span>
+                <input
+                  type='text'
+                  placeholder='e.g. Counselling'
+                  ref={unitNameInputRef}
+                  value={unitName}
+                  onChange={(event) => setUnitName(event.target.value)}
+                  required
+                />
+              </label>
+
+              <div className='incident-type-form-actions'>
+                {editingUnitId ? (
+                  <button type='button' className='incident-secondary-btn' onClick={clearUnitForm}>
+                    Cancel
+                  </button>
+                ) : null}
+
+                <button
+                  type='submit'
+                  className='incident-primary-btn'
+                  disabled={isCreatingUnit || isUpdatingUnit}
+                >
+                  {editingUnitId
+                    ? (isUpdatingUnit ? 'Updating...' : 'Update Unit')
+                    : (isCreatingUnit ? 'Creating...' : <><IoMdAdd /> Add Unit</>)}
+                </button>
+              </div>
+            </form>
+
+            <div className='incident-types-list'>
+              {isLoadingUnits ? (
+                <div className='incident-types-list-state'>
+                  <div className='incident-types-loader' role='status' aria-live='polite'>
+                    <span className='incident-types-loader-label'>Loading units</span>
+                    <span className='incident-types-loader-dots' aria-hidden='true'>
+                      <span className='dot' />
+                      <span className='dot' />
+                      <span className='dot' />
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+
+              {!isLoadingUnits && units.length === 0 ? (
+                <div className='incident-types-empty-box'>
+                  <div className='incident-types-empty-illustration' aria-hidden='true' />
+                  <p>No units found.</p>
+                  <span>When units are available from the API, they will appear here.</span>
+                </div>
+              ) : null}
+
+              {!isLoadingUnits && units.length > 0 ? units.map((unit, index) => (
+                <article key={unit.id || `unit-${index}`} className='incident-type-item'>
+                  <div className='incident-type-item-content'>
+                    <h4>{unit.name}</h4>
+                  </div>
+                  <div className='incident-type-item-actions'>
+                    <button
+                      type='button'
+                      className='incident-edit-btn'
+                      onClick={() => handleEditUnit(unit)}
+                      disabled={isDeletingUnitId === unit.id}
+                    >
+                      <FiEdit2 size={14} /> Edit
+                    </button>
+                    <button
+                      type='button'
+                      className='incident-delete-btn'
+                      onClick={() => handleDeleteUnit(unit.id)}
+                      disabled={isDeletingUnitId === unit.id}
+                    >
+                      <RiDeleteBin6Line size={14} /> {isDeletingUnitId === unit.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
+                </article>
+              )) : null}
+            </div>
+          </div>
+        )}
+
         {activeTab === 'Activities' && (
           <div className='activities'>
             <div className='activities-head'>
@@ -808,35 +1980,81 @@ const Settings = () => {
                 />
               </label>
 
+              <label>
+                <span>Grade Type</span>
+                <select
+                  value={activityGradeType}
+                  onChange={(event) => setActivityGradeType(event.target.value)}
+                  required
+                >
+                  <option value='PERCENTAGE'>PERCENTAGE</option>
+                  <option value='TIME'>TIME</option>
+                </select>
+              </label>
+
               <div className='activity-form-actions'>
                 {editingActivityId ? (
                   <button type='button' className='incident-secondary-btn' onClick={clearActivityForm}>
                     Cancel
                   </button>
                 ) : null}
-                <button type='submit' className='incident-primary-btn'>
-                  {editingActivityId ? 'Update Activity' : (<><IoMdAdd /> Add Activity</>)}
+                <button type='submit' className='incident-primary-btn' disabled={isCreatingActivity || isUpdatingActivity}>
+                  {editingActivityId ? (isUpdatingActivity ? 'Updating...' : 'Update Activity') : (isCreatingActivity ? 'Creating...' : (<><IoMdAdd /> Add Activity</>))}
                 </button>
               </div>
             </form>
 
             <div className='activities-list'>
-              {activities.map((activity) => (
-                <article key={activity.id} className='activity-item'>
-                  <div className='activity-item-content'>
-                    <h4>{activity.name}</h4>
-                    <p>{activity.description}</p>
-                  </div>
-                  <div className='activity-item-actions'>
-                    <button type='button' className='incident-edit-btn' onClick={() => handleEditActivity(activity)}>
-                      <FiEdit2 size={14} /> Edit
-                    </button>
-                    <button type='button' className='incident-delete-btn' onClick={() => handleDeleteActivity(activity.id)}>
-                      <RiDeleteBin6Line size={14} /> Delete
-                    </button>
-                  </div>
-                </article>
-              ))}
+              {isLoadingActivities ? (
+                <div className='incident-types-empty-box'>
+                  <p>Loading activities…</p>
+                </div>
+              ) : null}
+              {!isLoadingActivities && activities.length === 0 ? (
+                <div className='incident-types-empty-box'>
+                  <p>No activities yet.</p>
+                  <span>Activities returned from the admin API will appear here.</span>
+                </div>
+              ) : null}
+              {!isLoadingActivities && activities.map((activity) => {
+                const formattedCreatedAt = activity.createdAt
+                  ? new Intl.DateTimeFormat('en-GB', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                  }).format(new Date(activity.createdAt))
+                  : '—'
+
+                return (
+                  <article key={activity.id} className='activity-item'>
+                    <div className='activity-item-content'>
+                      <h4>{activity.name}</h4>
+                      <p>{activity.description}</p>
+                      <div className='activity-item-meta'>
+                        <span>Grade Type: {activity.gradeType}</span>
+                        <span>Unit: {activity.unit}</span>
+                        <span>Created by: {activity.createdByName}</span>
+                        <span>Date Created: {formattedCreatedAt}</span>
+                      </div>
+                    </div>
+                    <div className='activity-item-actions'>
+                      <button type='button' className='incident-edit-btn' onClick={() => handleEditActivity(activity)}>
+                        <FiEdit2 size={14} /> Edit
+                      </button>
+                      <button
+                        type='button'
+                        className='incident-delete-btn'
+                        onClick={() => handleDeleteActivity(activity.id)}
+                        disabled={isDeletingActivityId === activity.id}
+                      >
+                        <RiDeleteBin6Line size={14} /> {isDeletingActivityId === activity.id ? 'Deleting...' : 'Delete'}
+                      </button>
+                    </div>
+                  </article>
+                )
+              })}
             </div>
           </div>
         )}
@@ -863,14 +2081,24 @@ const Settings = () => {
                   />
                 </label>
 
+                <label>
+                  <span>Description</span>
+                  <textarea
+                    placeholder='Describe the purpose and scope of this role.'
+                    value={roleDescription}
+                    onChange={(event) => setRoleDescription(event.target.value)}
+                    rows={3}
+                  />
+                </label>
+
                 <div className='role-form-actions'>
                   {editingRoleId ? (
                     <button type='button' className='admin-secondary-btn' onClick={clearRoleForm}>
                       Cancel
                     </button>
                   ) : null}
-                  <button type='submit' className='admin-primary-btn'>
-                    {editingRoleId ? 'Update Role' : 'Create Role'}
+                  <button type='submit' className='admin-primary-btn' disabled={isCreatingRole}>
+                    {editingRoleId ? 'Update Role' : (isCreatingRole ? 'Creating...' : 'Create Role')}
                   </button>
                 </div>
               </form>
@@ -888,18 +2116,27 @@ const Settings = () => {
                       required
                     />
                   </label>
-                  <button type='submit' className='admin-primary-btn'>
-                    <IoMdAdd /> Add Permission
+                  <label>
+                    <span>Description</span>
+                    <input
+                      type='text'
+                      placeholder='Brief description of this permission'
+                      value={newPermissionDescription}
+                      onChange={(event) => setNewPermissionDescription(event.target.value)}
+                    />
+                  </label>
+                  <button type='submit' className='admin-primary-btn' disabled={isCreatingPermission}>
+                    <IoMdAdd /> {isCreatingPermission ? 'Adding...' : 'Add Permission'}
                   </button>
                 </form>
                 <div className='permissions-list'>
                   {permissions.map((permission) => (
-                    <div key={permission} className='permission-list-item'>
-                      <span>{permission}</span>
+                    <div key={permission.id || permission.name} className='permission-list-item'>
+                      <span>{permission.name}</span>
                       <button
                         type='button'
                         className='permission-delete-btn'
-                        onClick={() => handleDeletePermission(permission)}
+                        onClick={() => handleDeletePermission(permission.id)}
                       >
                         <IoMdClose size={14} />
                       </button>
@@ -936,9 +2173,11 @@ const Settings = () => {
                     >
                       <option value=''>Select a permission…</option>
                       {permissions
-                        .filter((p) => !permissionDraft.includes(p))
+                        .filter((permission) =>
+                          !permissionDraft.some((p) => p?.id === permission?.id)
+                        )
                         .map((permission) => (
-                          <option key={permission} value={permission}>{permission}</option>
+                          <option key={permission.id || permission.name} value={permission.name}>{permission.name}</option>
                         ))}
                     </select>
                     <button
@@ -954,11 +2193,11 @@ const Settings = () => {
                   {permissionDraft.length > 0 && (
                     <div className='permission-assigned-chips'>
                       {permissionDraft.map((permission) => (
-                        <span key={permission} className='permission-chip'>
-                          {permission}
+                        <span key={permission?.id || permission?.name} className='permission-chip'>
+                          {permission?.name}
                           <button
                             type='button'
-                            onClick={() => handleRemovePermissionFromDraft(permission)}
+                            onClick={() => handleRemovePermissionFromDraft(permission?.id)}
                           >
                             <IoMdClose size={12} />
                           </button>
@@ -969,8 +2208,8 @@ const Settings = () => {
                 </div>
 
                 <div className='role-form-actions'>
-                  <button type='submit' className='admin-primary-btn' disabled={!permissionRoleId}>
-                    Save Permissions
+                  <button type='submit' className='admin-primary-btn' disabled={!permissionRoleId || isSavingRolePermissions}>
+                    {isSavingRolePermissions ? 'Saving...' : 'Save Permissions'}
                   </button>
                 </div>
               </form>
@@ -982,7 +2221,7 @@ const Settings = () => {
                       <h5>{role.name}</h5>
                       <div className='role-permissions-chips'>
                         {role.permissions.length > 0 ? role.permissions.map((permission) => (
-                          <span key={permission}>{permission}</span>
+                          <span key={permission?.id || permission?.name}>{permission?.name}</span>
                         )) : <span className='role-no-permission'>No permissions assigned</span>}
                       </div>
                     </div>
@@ -1001,6 +2240,125 @@ const Settings = () => {
                   </article>
                 ))}
               </div>
+            </section>
+          </div>
+        )}
+
+        {activeTab === 'Resources' && (
+          <div className='resources-tab'>
+            <div className='resources-head'>
+              <p>Resources</p>
+              <span>Create and publish educational or guidance resources for admins and users.</span>
+            </div>
+
+            <section className='resource-editor-section'>
+              <h4>Add New Resource</h4>
+              <form className='resource-form' onSubmit={handlePostResource}>
+                <label>
+                  <span>Title</span>
+                  <input
+                    type='text'
+                    placeholder='e.g. How to Handle Bullying Incidents'
+                    value={resourceTitle}
+                    onChange={(e) => setResourceTitle(e.target.value)}
+                    required
+                  />
+                </label>
+
+                <label>
+                  <span>Incident Type</span>
+                  <select
+                    value={resourceIncidentTypeId}
+                    onChange={(e) => setResourceIncidentTypeId(e.target.value)}
+                    required
+                    disabled={isLoadingIncidentTypes || incidentTypes.length === 0}
+                  >
+                    <option value='' disabled>Select incident type</option>
+                    {incidentTypes.map((type) => (
+                      <option key={type.id} value={type.id}>{type.name}</option>
+                    ))}
+                  </select>
+                  {isLoadingIncidentTypes && <span className='resource-hint'>Loading incident types…</span>}
+                  {!isLoadingIncidentTypes && incidentTypes.length === 0 && (
+                    <span className='resource-hint'>No incident types yet. Create some under the Incident Types tab.</span>
+                  )}
+                </label>
+
+                <div className='resource-editor-label'>
+                  <span>Content</span>
+                  <RichTextEditor
+                    value={resourceContent}
+                    onChange={setResourceContent}
+                    placeholder='Write your resource content here. Use the toolbar to format text, add headings, lists, and links.'
+                  />
+                </div>
+
+                <div className='resource-form-actions'>
+                  <button type='button' className='incident-secondary-btn' onClick={clearResourceForm}>
+                    Clear
+                  </button>
+                  <button
+                    type='submit'
+                    className='incident-primary-btn'
+                    disabled={isPostingResource || isLoadingIncidentTypes || incidentTypes.length === 0}
+                  >
+                    {isPostingResource ? 'Publishing…' : <><IoMdAdd /> Publish Resource</>}
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <section className='resource-list-section'>
+              <h4>Published Resources</h4>
+              {isLoadingResources ? (
+                <div className='incident-types-list-state'>
+                  <div className='incident-types-loader' role='status' aria-live='polite'>
+                    <span className='incident-types-loader-label'>Loading resources</span>
+                    <span className='incident-types-loader-dots' aria-hidden='true'>
+                      <span className='dot' /><span className='dot' /><span className='dot' />
+                    </span>
+                  </div>
+                </div>
+              ) : null}
+              {!isLoadingResources && resources.length === 0 ? (
+                <div className='incident-types-empty-box'>
+                  <div className='incident-types-empty-illustration' aria-hidden='true' />
+                  <p>No resources yet.</p>
+                  <span>Published resources will appear here.</span>
+                </div>
+              ) : null}
+              {!isLoadingResources && resources.length > 0 ? (
+                <div className='resource-list'>
+                  {resources.map((resource, index) => {
+                    const rid = resource.id || resource.resourceId || `resource-${index}`
+                    const typeName = resource.incidentTypeName || incidentTypes.find(
+                      (t) => t.id === (resource.incidentTypeId || resource.incidentType?.id)
+                    )?.name || resource.incidentType?.name || '—'
+                    return (
+                      <article key={rid} className='resource-item'>
+                        <div className='resource-item-meta'>
+                          <h5>{resource.title || 'Untitled'}</h5>
+                          <span className='resource-incident-badge'>{typeName}</span>
+                        </div>
+                        <div
+                          className='resource-item-preview'
+                          dangerouslySetInnerHTML={{ __html: resource.content || '' }}
+                        />
+                        <div className='resource-item-actions'>
+                          <button
+                            type='button'
+                            className='incident-delete-btn'
+                            onClick={() => handleDeleteResource(rid)}
+                            disabled={isDeletingResourceId === rid}
+                          >
+                            <RiDeleteBin6Line size={14} /> {isDeletingResourceId === rid ? 'Deleting…' : 'Delete'}
+                          </button>
+                        </div>
+                      </article>
+                    )
+                  })}
+                </div>
+              ) : null}
             </section>
           </div>
         )}

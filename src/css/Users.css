@@ -176,7 +176,7 @@
 
 .users table {
     width: 100%;
-  min-width: 920px;
+  min-width: 980px;
     border-collapse: separate;
     border-spacing: 0;
     table-layout: fixed;
@@ -198,12 +198,20 @@
     white-space: nowrap;
 }
 
-.users table th:nth-child(1) { width: 24%; }
-.users table th:nth-child(2) { width: 12%; }
-.users table th:nth-child(3) { width: 22%; }
-.users table th:nth-child(4) { width: 16%; }
-.users table th:nth-child(5) { width: 16%; }
+.users table th:nth-child(1) { width: 23%; }
+.users table th:nth-child(2) { width: 11%; }
+.users table th:nth-child(3) { width: 20%; }
+.users table th:nth-child(4) { width: 13%; }
+.users table th:nth-child(5) { width: 13%; }
 .users table th:nth-child(6) { width: 10%; }
+.users table th:nth-child(7) { width: 10%; }
+
+.users table th:nth-child(6),
+.users table th:nth-child(7),
+.users table td:nth-child(6),
+.users table td:nth-child(7) {
+  text-align: center;
+}
 
 .users table tbody tr + tr td {
     border-top: 1px solid #ececf3;
@@ -248,6 +256,35 @@
     align-items: center;
     justify-content: center;
 }
+
+  .users .users-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+
+  .users .users-status.active {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .users .users-status.invited,
+  .users .users-status.pending {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .users .users-status.suspended,
+  .users .users-status.inactive,
+  .users .users-status.disabled {
+    background: #fee2e2;
+    color: #991b1b;
+  }
 
 /* ---- Users Pagination ---- */
 .users-pagination {
@@ -362,7 +399,7 @@
 }
 
 .users-filter-modal {
-  width: min(440px, 100%);
+  width: min(620px, 100%);
   background: #fff;
   border: 1px solid #ECECF3;
   border-radius: 12px;
@@ -408,13 +445,13 @@
 }
 
 .users-filter-modal-form {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
 .users-filter-modal-form label {
-  margin-top: 6px;
+  margin-top: 4px;
   font-size: 13px;
   font-weight: 600;
   color: #001616;
@@ -445,6 +482,17 @@
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 680px) {
+  .users-filter-modal {
+    width: min(440px, 100%);
+  }
+
+  .users-filter-modal-form {
+    grid-template-columns: 1fr;
+  }
 }
 
 .users-filter-modal-actions button {
