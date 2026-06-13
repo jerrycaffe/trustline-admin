@@ -1,27 +1,26 @@
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import '../css/UserProfile.css'
 import Sidebar from './Sidebar'
 import Searchbar from './Searchbar'
 import { IoArrowBackOutline } from 'react-icons/io5'
 import { FiCamera, FiEdit2, FiLock } from 'react-icons/fi'
-import { FaCheckCircle } from 'react-icons/fa'
+import { FaCheckCircle, FaUserCircle } from 'react-icons/fa'
 import { MdOutlineErrorOutline } from 'react-icons/md'
-
-import profilePic from '../assets/profilepic.png'
+import { api } from '../services/api'
 import banner from '../assets/banner.png'
 
 const initialProfile = {
-  firstName: 'Jessica',
-  lastName: 'Wang',
+  firstName: '...',
+  lastName: '...',
   position: 'Support Staff',
-  adminId: '203',
-  email: 'jessicawang96@yahoo.com',
-  gender: 'female',
+  adminId: '...',
+  email: '...',
+  gender: '...',
   address: 'N/A',
-  phoneNumber: '+234 801 886 7528',
-  unit: 'Gender-based Violence Unit',
-  dateJoined: '12th August, 2024',
+  phoneNumber: 'N/A',
+  unit: 'N/A',
+  dateJoined: 'N/A',
   isAccountVerified: true,
 }
 
@@ -29,15 +28,80 @@ const genderLabel = (g) => (g === 'male' ? 'Male' : g === 'female' ? 'Female' : 
 
 const Spinner = () => <span className='profile-spinner' aria-hidden='true' />
 
+const extractProfilePayload = (response) => {
+  if (response && typeof response === 'object' && !Array.isArray(response)) {
+    if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
+      return response.data
+    }
+
+    return response
+  }
+
+  return null
+}
+
+const normalizeGender = (gender) => {
+  const value = String(gender || '').toLowerCase()
+  return value === 'male' || value === 'female' ? value : 'not-set'
+}
+
+const normalizeProfile = (user = {}) => ({
+  ...initialProfile,
+  adminId: user.userId || initialProfile.adminId,
+  position: user.role || initialProfile.position,
+  email: user.email || initialProfile.email,
+  phoneNumber: user.phoneNumber || "N/A",
+  firstName: user.firstName || "N/A",
+  lastName: user.lastName || "N/A",
+  gender: normalizeGender(user.gender),
+  unit: user.unit || "N/A",
+  dateJoined: user.createdAt ? new Date(user.createdAt).toDateString() : "N/A",
+})
+
 const UserProfile = () => {
   const navigate = useNavigate()
   const fileInputRef = useRef(null)
   const [profile, setProfile] = useState(initialProfile)
-  const [profileImage, setProfileImage] = useState(profilePic)
+  const [profileImage, setProfileImage] = useState('')
   const [isEditing, setIsEditing] = useState(false)
   const [draft, setDraft] = useState(initialProfile)
   const [isSaving, setIsSaving] = useState(false)
   const [isUploadingPic, setIsUploadingPic] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [profileError, setProfileError] = useState('')
+
+  useEffect(() => {
+    let isActive = true
+
+    const loadProfile = async () => {
+      try {
+        setIsLoadingProfile(true)
+        const response = await api.get('/api/v1/profile')
+        const payload = extractProfilePayload(response)
+
+        if (!isActive || !payload) return
+
+        const nextProfile = normalizeProfile(payload)
+        setProfile(nextProfile)
+        setDraft(nextProfile)
+        setProfileImage(payload.profileImageUrl || '')
+        setProfileError('')
+      } catch (error) {
+        if (!isActive) return
+        setProfileError(error.message || 'Unable to load your profile.')
+      } finally {
+        if (isActive) {
+          setIsLoadingProfile(false)
+        }
+      }
+    }
+
+    loadProfile()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
 
   const openEdit = () => {
     setDraft(profile)
@@ -94,12 +158,21 @@ const UserProfile = () => {
           <p>My Profile</p>
         </div>
 
+        {isLoadingProfile ? <p style={{ margin: '8px 0 0 0' }}>Loading profile...</p> : null}
+        {profileError ? <p style={{ margin: '8px 0 0 0', color: '#d14343' }}>{profileError}</p> : null}
+
         <div className='pro-file'>
           <div className='banner'>
             <img src={banner} alt='banner' />
           </div>
           <div className='profile-pic'>
-            <img src={profileImage} alt='profile' />
+            {profileImage ? (
+              <img src={profileImage} alt='profile' />
+            ) : (
+              <div className='profile-pic-placeholder' aria-label='Unisex profile avatar'>
+                <FaUserCircle size={82} />
+              </div>
+            )}
             <button
               type='button'
               className='profile-pic-edit'

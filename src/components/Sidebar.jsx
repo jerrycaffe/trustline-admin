@@ -5,7 +5,6 @@ import { FaRegFileLines, FaRegUser } from 'react-icons/fa6';
 import { RxDashboard } from 'react-icons/rx';
 import { BiLogOut } from 'react-icons/bi';
 import { RiStackLine } from 'react-icons/ri';
-import { PiChatsCircleLight } from 'react-icons/pi';
 import { FaHandHoldingHeart } from 'react-icons/fa';
 import { IoIosSettings, IoMdClose } from 'react-icons/io';
 import logoMark from '../assets/logoimage.png';
@@ -14,7 +13,6 @@ const navItems = [
   { label: 'Dashboard', path: '/dashboard', icon: RxDashboard },
   { label: 'Reports', path: '/reports', icon: FaRegFileLines },
   { label: 'Users', path: '/users', icon: FaRegUser },
-  { label: 'Chats', path: '/chats', icon: PiChatsCircleLight },
   { label: 'Resources', path: '/resources', icon: RiStackLine },
   { label: 'Activities', path: '/activities', icon: FaHandHoldingHeart },
   { label: 'Settings', path: '/settings', icon: IoIosSettings },
