@@ -77,6 +77,7 @@ const Login = () => {
         response.accessToken ||
         response.data?.token ||
         response.data?.accessToken;
+        console.log('Extracted token:', token);
 
       if (!token) {
         setApiError('Login failed. No token returned.');
@@ -90,25 +91,6 @@ const Login = () => {
       );
 
       console.log('Decoded JWT payload:', payload);
-
-      // Role claim could be under several keys
-      const roleClaim =
-        payload.roles ||
-        payload.role ||
-        payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] ||
-        [];
-      const rolesArray = Array.isArray(roleClaim) ? roleClaim : [roleClaim];
-
-      console.log('Roles found in token:', rolesArray);
-
-      const isAdmin = rolesArray.some(
-        (r) => typeof r === 'string' && r.toLowerCase() === 'administrator'
-      );
-
-      if (!isAdmin) {
-        setApiError('Access denied. Administrator privileges required.');
-        return;
-      }
 
       // Encrypt and store token + all user data
       encryptAndStore('authToken', token);

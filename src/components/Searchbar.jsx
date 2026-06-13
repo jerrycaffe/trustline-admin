@@ -1,9 +1,9 @@
-import profilePic from '../assets/profilepic.png';
 import '../css/Searchbar.css';
 import { CiSearch } from 'react-icons/ci';
 import { IoMdNotificationsOutline } from 'react-icons/io';
 import { IoMdMenu } from 'react-icons/io';
 import { Link } from 'react-router-dom';
+import { FaUserCircle } from 'react-icons/fa';
 
 const Searchbar = () => {
   const handleOpenSidebar = () => {
@@ -33,8 +33,8 @@ const Searchbar = () => {
           </button>
         </Link>
         <Link to='/user-profile' className='link' aria-label='Profile'>
-          <span className='avatar'>
-            <img src={profilePic} alt='Profile' />
+          <span className='avatar avatar-unisex'>
+            <FaUserCircle size={26} />
           </span>
         </Link>
       </div>
