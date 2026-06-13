@@ -145,6 +145,8 @@ const isPdfResourceUrl = (value) => {
 
 const looksLikeHtml = (value) => /<\/?[a-z][\s\S]*>/i.test(String(value || ''));
 
+const INSTITUTION_ID = import.meta.env.VITE_INSTITUTION_ID;
+
 const Resources = () => {
   const [resources, setResources] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -164,7 +166,11 @@ const Resources = () => {
   useEffect(() => {
     let active = true;
     setIsLoading(true);
-    api.get('/api/v1/resources?offset=0&limit=20')
+    const resourcesUrl = INSTITUTION_ID
+      ? `/api/v1/resources?offset=0&limit=20&institutionId=${encodeURIComponent(INSTITUTION_ID)}`
+      : '/api/v1/resources?offset=0&limit=20';
+
+    api.get(resourcesUrl)
       .then((res) => {
         if (!active) return;
         const items = extractResourceItems(res)
